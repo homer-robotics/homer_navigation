@@ -41,52 +41,52 @@ HomerNavigationNode::HomerNavigationNode()
 void HomerNavigationNode::loadParameters()
 {
 	//Explorer constructor 
-	loadConfigValue("/homer_mapping/resolution", 						m_resolution, (double) 0.05);
-	loadConfigValue("/homer_navigation/allowed_obstacle_distance/min", 	m_AllowedObstacleDistance.first, (float) 0.3);
-	loadConfigValue("/homer_navigation/allowed_obstacle_distance/max", 	m_AllowedObstacleDistance.second, (float) 5.0);
-	loadConfigValue("/homer_navigation/safe_obstacle_distance/min", 	m_SafeObstacleDistance.first, (float) 0.7);
-	loadConfigValue("/homer_navigation/safe_obstacle_distance/max", 	m_SafeObstacleDistance.second, (float) 1.5);
-	loadConfigValue("/homer_navigation/frontier_safeness_factor", 		m_FrontierSafenessFactor, (float) 1.4);
-	loadConfigValue("/homer_navigation/safe_path_weight", 				m_SafePathWeight, (double) 1.2);
-	loadConfigValue("/homer_navigation/waypoint_sampling_threshold", 	m_waypoint_sampling_threshold, (float) 1.5);    
+	ros::param::param("/homer_mapping/resolution", 						m_resolution, (double) 0.05);
+	ros::param::param("/homer_navigation/allowed_obstacle_distance/min", 	m_AllowedObstacleDistance.first, (float) 0.3);
+	ros::param::param("/homer_navigation/allowed_obstacle_distance/max", 	m_AllowedObstacleDistance.second, (float) 5.0);
+	ros::param::param("/homer_navigation/safe_obstacle_distance/min", 	m_SafeObstacleDistance.first, (float) 0.7);
+	ros::param::param("/homer_navigation/safe_obstacle_distance/max", 	m_SafeObstacleDistance.second, (float) 1.5);
+	ros::param::param("/homer_navigation/frontier_safeness_factor", 		m_FrontierSafenessFactor, (float) 1.4);
+	ros::param::param("/homer_navigation/safe_path_weight", 				m_SafePathWeight, (double) 1.2);
+	ros::param::param("/homer_navigation/waypoint_sampling_threshold", 	m_waypoint_sampling_threshold, (float) 1.5);    
 	m_AllowedObstacleDistance.first 	/= m_resolution;
 	m_AllowedObstacleDistance.second	/= m_resolution;
 	m_SafeObstacleDistance.first 		/= m_resolution;
 	m_SafeObstacleDistance.second 		/= m_resolution;
 
 	//check path 
-	loadConfigValue("/homer_navigation/check_path", 					m_check_path, (bool) true);
-	loadConfigValue("/homer_navigation/check_path_max_distance", 		m_check_path_max_distance, (float) 2.0);
+	ros::param::param("/homer_navigation/check_path", 					m_check_path, (bool) true);
+	ros::param::param("/homer_navigation/check_path_max_distance", 		m_check_path_max_distance, (float) 2.0);
 
 	//collision 
-	loadConfigValue("/homer_navigation/collision_distance", 			m_collision_distance, (float) 0.3);
-	loadConfigValue("/homer_navigation/collision_distance_near_target", m_collision_distance_near_target, (float) 0.2);
-	loadConfigValue("/homer_navigation/backward_collision_distance", 	m_backward_collision_distance, (float) 0.5);
+	ros::param::param("/homer_navigation/collision_distance", 			m_collision_distance, (float) 0.3);
+	ros::param::param("/homer_navigation/collision_distance_near_target", m_collision_distance_near_target, (float) 0.2);
+	ros::param::param("/homer_navigation/backward_collision_distance", 	m_backward_collision_distance, (float) 0.5);
 
 	//cmd_vel config values
-	loadConfigValue("/homer_navigation/min_turn_angle", 				m_min_turn_angle, (float) 0.15);
-	loadConfigValue("/homer_navigation/max_turn_speed", 				m_max_turn_speed, (float) 0.6);
-	loadConfigValue("/homer_navigation/min_turn_speed",					m_min_turn_speed, (float) 0.3);
-	loadConfigValue("/homer_navigation/max_move_speed", 				m_max_move_speed, (float) 0.4);
-	loadConfigValue("/homer_navigation/max_drive_angle",				m_max_drive_angle, (float) 0.6);
+	ros::param::param("/homer_navigation/min_turn_angle", 				m_min_turn_angle, (float) 0.15);
+	ros::param::param("/homer_navigation/max_turn_speed", 				m_max_turn_speed, (float) 0.6);
+	ros::param::param("/homer_navigation/min_turn_speed",					m_min_turn_speed, (float) 0.3);
+	ros::param::param("/homer_navigation/max_move_speed", 				m_max_move_speed, (float) 0.4);
+	ros::param::param("/homer_navigation/max_drive_angle",				m_max_drive_angle, (float) 0.6);
 
 	//caution factors
-	loadConfigValue("/homer_navigation/map_speed_factor", 				m_map_speed_factor, (float) 1.0);	
-	loadConfigValue("/homer_navigation/waypoint_speed_factor", 			m_waypoint_speed_factor, (float) 1.0);	
-	loadConfigValue("/homer_navigation/obstacle_speed_factor", 			m_obstacle_speed_factor, (float) 1.0);	
-	loadConfigValue("/homer_navigation/target_distance_speed_factor", 	m_target_distance_speed_factor, (float) 0.4);	
+	ros::param::param("/homer_navigation/map_speed_factor", 				m_map_speed_factor, (float) 1.0);	
+	ros::param::param("/homer_navigation/waypoint_speed_factor", 			m_waypoint_speed_factor, (float) 1.0);	
+	ros::param::param("/homer_navigation/obstacle_speed_factor", 			m_obstacle_speed_factor, (float) 1.0);	
+	ros::param::param("/homer_navigation/target_distance_speed_factor", 	m_target_distance_speed_factor, (float) 0.4);	
 
 	//robot dimensions
-	loadConfigValue("/homer_navigation/min_x", 							m_min_x, (float) 0.3);
-	loadConfigValue("/homer_navigation/min_y",							m_min_y, (float) 0.27);
+	ros::param::param("/homer_navigation/min_x", 							m_min_x, (float) 0.3);
+	ros::param::param("/homer_navigation/min_y",							m_min_y, (float) 0.27);
 
 	//error durations
-	loadConfigValue("/homer_navigation/callback_error_duration", 		m_callback_error_duration, (float) 0.3);
+	ros::param::param("/homer_navigation/callback_error_duration", 		m_callback_error_duration, (float) 0.3);
 
-	loadConfigValue("/homer_navigation/use_ptu",						m_use_ptu, (bool) false);
+	ros::param::param("/homer_navigation/use_ptu",						m_use_ptu, (bool) false);
 
-	loadConfigValue("/homer_navigation/unknown_threshold", 				m_unknown_threshold, (int) 50);
-	loadConfigValue("/homer_navigation/waypoint_radius_factor",			m_waypoint_radius_factor, (float) 0.25);
+	ros::param::param("/homer_navigation/unknown_threshold", 				m_unknown_threshold, (int) 50);
+	ros::param::param("/homer_navigation/waypoint_radius_factor",			m_waypoint_radius_factor, (float) 0.25);
 }
 
 void HomerNavigationNode::init()

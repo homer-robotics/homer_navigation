@@ -30,9 +30,6 @@
 #include <homer_ptu_msgs/CenterWorldPoint.h>
 #include <homer_ptu_msgs/SetPanTilt.h>
 
-#include <homer_tools/loadRosConfig.h>
-
-//nav_libs
 #include <homer_nav_libs/tools.h>
 #include <homer_nav_libs/Explorer/Explorer.h>
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>homer_navigation</name>
-  <version>1.0.0</version>
+  <version>0.1.0</version>
   <description>The homer_navigation package</description>
 
   <maintainer email="vseib@uni-koblenz.de">Viktor Seib</maintainer>
@@ -13,26 +13,24 @@
   
   <build_depend>roscpp</build_depend>
   <build_depend>roslib</build_depend>
-  <build_depend>robbie_architecture</build_depend>
-  <build_depend>robot_platform</build_depend>
-  <build_depend>nav_libs</build_depend>
+  <build_depend>homer_robbie_architecture</build_depend>
+  <build_depend>homer_nav_libs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
-  <build_depend>mapnav_msgs</build_depend>
+  <build_depend>homer_mapnav_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
-  <build_depend>homer_tools</build_depend>
+  <build_depend>cmake_modules</build_depend>
+  <build_depend>eigen</build_depend>
   
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
-  <run_depend>robbie_architecture</run_depend>
-  <run_depend>robot_platform</run_depend>
-  <run_depend>nav_libs</run_depend>
+  <run_depend>homer_robbie_architecture</run_depend>
+  <run_depend>homer_nav_libs</run_depend>
   <run_depend>nav_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>mapnav_msgs</run_depend>
+  <run_depend>homer_mapnav_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>homer_tools</run_depend>
 
 </package>

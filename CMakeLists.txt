@@ -5,14 +5,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
   homer_robbie_architecture
-  homer_robot_platform
   nav_msgs
   sensor_msgs
   homer_mapnav_msgs
   homer_nav_libs
   tf
   cmake_modules
-  homer_tools
 )
 
 find_package(Eigen3 REQUIRED)
@@ -21,6 +19,15 @@ set(CMAKE_BUILD_TYPE Release)
 
 catkin_package(
   INCLUDE_DIRS include
+  CATKIN_DEPENDS
+  	roscpp
+	roslib
+	homer_robbie_architecture
+	nav_msgs
+	sensor_msgs
+	homer_mapnav_msgs
+	homer_nav_libs
+	tf
 )
 
 include_directories(
@@ -36,3 +43,13 @@ target_link_libraries(homer_navigation
    ${catkin_LIBRARIES}
    ${EIGEN3_LIBRARIES}
  )
+
+install(DIRECTORY include/${PROJECT_NAME}/
+	DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(TARGETS homer_navigation
+	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
