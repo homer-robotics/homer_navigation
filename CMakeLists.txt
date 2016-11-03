@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   homer_nav_libs
   tf
   cmake_modules
+  homer_ptu_msgs
 )
 
 find_package(Eigen3 REQUIRED)
