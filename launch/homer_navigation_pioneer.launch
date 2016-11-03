@@ -1,0 +1,4 @@
+<launch>
+ <rosparam command="load" file="$(find homer_navigation)/config/homer_navigation_pioneer.yaml"/>
+ <node ns="/homer_navigation" name="homer_navigation" pkg="homer_navigation" type="homer_navigation" output="screen"/>
+</launch>
