@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.4 (2016-11-03)
+------------------
 * fixes
 * updated changelog
 * Contributors: Niklas Yann Wettengel
