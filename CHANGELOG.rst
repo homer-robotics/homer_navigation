@@ -2,6 +2,9 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.1.3 (2016-11-03)
 ------------------
 
