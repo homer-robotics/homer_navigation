@@ -273,7 +273,7 @@ class HomerNavigationNode {
 
   /** do not replan if lisa avoids an obstacle, instead send target
    * unreachable*/
-  bool m_no_replanning_on_collision;
+  bool m_stop_before_obstacle;
 
   bool m_avoided_collision;
 

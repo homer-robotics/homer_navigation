@@ -97,8 +97,6 @@ void HomerNavigationNode::loadParameters() {
                     m_collision_distance_near_target, (float)0.2);
   ros::param::param("/homer_navigation/backward_collision_distance",
                     m_backward_collision_distance, (float)0.5);
-  ros::param::param("/homer_navigation/no_replanning_on_collision",
-                    m_no_replanning_on_collision, (bool)false);
 
   // cmd_vel config values
   ros::param::param("/homer_navigation/min_turn_angle", m_min_turn_angle,
@@ -224,9 +222,6 @@ void HomerNavigationNode::calculatePath() {
     if (m_last_calculations_failed > 8) {
       sendTargetUnreachableMsg(
           homer_mapnav_msgs::TargetUnreachable::NO_PATH_FOUND);
-      if (m_initial_path_reaches_target) {
-        // TODO(mroosen) temp obstacle in path
-      }
     }
   } else {
     m_last_calculations_failed = 0;
@@ -268,13 +263,6 @@ void HomerNavigationNode::startNavigation() {
     targetPositionReached();
     return;
   }
-  if (m_initial_path_reaches_target && m_no_replanning_on_collision) {
-    ROS_INFO_STREAM(
-        "Collision avoided and option no_replanning_on_collision is set.");
-    ROS_INFO_STREAM("Sending target unreachable.");
-    sendTargetUnreachableMsg(
-        homer_mapnav_msgs::TargetUnreachable::LASER_OBSTACLE);
-  }
   ROS_INFO_STREAM("Distance to target still too large ("
                   << m_distance_to_target
                   << "m; requested: " << m_desired_distance << "m)");
@@ -285,6 +273,25 @@ void HomerNavigationNode::startNavigation() {
 
   m_explorer->setOccupancyMap(m_width, m_width, m_origin,
                               &(*m_last_map_data)[0]);
+
+  // check if there still exists a path to the original target
+  if (m_avoided_collision && m_initial_path_reaches_target &&
+      m_stop_before_obstacle) {
+    m_explorer->setStart(
+        map_tools::toMapCoords(m_robot_pose.position, m_origin, m_resolution));
+
+    bool success;
+    m_pixel_path = m_explorer->getPath(success);
+    if (!success) {
+      ROS_INFO_STREAM(
+          "Initial path would have reached target, new path does not. "
+          << "Sending target unreachable.");
+      sendTargetUnreachableMsg(
+          homer_mapnav_msgs::TargetUnreachable::LASER_OBSTACLE);
+      return;
+    }
+  }
+
   m_explorer->setStart(
       map_tools::toMapCoords(m_robot_pose.position, m_origin, m_resolution));
   Eigen::Vector2i new_target_approx = m_explorer->getNearestAccessibleTarget(
@@ -966,6 +973,7 @@ void HomerNavigationNode::downlaserDataCallback(
 
 void HomerNavigationNode::startNavigationCallback(
     const homer_mapnav_msgs::StartNavigation::ConstPtr& msg) {
+  ROS_INFO_STREAM("This is MY node.");
   m_avoided_collision = false;
   m_target_point = msg->goal.position;
   m_target_orientation = tf::getYaw(msg->goal.orientation);
@@ -1062,6 +1070,7 @@ void HomerNavigationNode::navigateToPOICallback(
       m_fast_path_planning = false;
       m_new_target = true;
       m_target_name = msg->poi_name;
+      m_stop_before_obstacle = msg->stop_before_obstacle;
 
       ROS_INFO_STREAM("Navigating to target "
                       << m_target_point.x << ", " << m_target_point.y
