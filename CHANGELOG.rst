@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.7 (2016-11-17)
+------------------
 * Add a parameter to NavigateToPOI msgs to controll new behaviour (remove config parameter)
 * Introduce parameter to change behaviour after collision avoidance
 * Autoformat homer_navigation_node
