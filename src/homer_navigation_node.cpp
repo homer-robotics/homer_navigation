@@ -97,6 +97,8 @@ void HomerNavigationNode::loadParameters() {
                     m_collision_distance_near_target, (float)0.2);
   ros::param::param("/homer_navigation/backward_collision_distance",
                     m_backward_collision_distance, (float)0.5);
+  ros::param::param("/homer_navigation/no_replanning_on_collision",
+                    m_no_replanning_on_collision, (bool)false);
 
   // cmd_vel config values
   ros::param::param("/homer_navigation/min_turn_angle", m_min_turn_angle,
@@ -265,6 +267,13 @@ void HomerNavigationNode::startNavigation() {
     m_path_reaches_target = true;
     targetPositionReached();
     return;
+  }
+  if (m_initial_path_reaches_target && m_no_replanning_on_collision) {
+    ROS_INFO_STREAM(
+        "Collision avoided and option no_replanning_on_collision is set.");
+    ROS_INFO_STREAM("Sending target unreachable.");
+    sendTargetUnreachableMsg(
+        homer_mapnav_msgs::TargetUnreachable::LASER_OBSTACLE);
   }
   ROS_INFO_STREAM("Distance to target still too large ("
                   << m_distance_to_target

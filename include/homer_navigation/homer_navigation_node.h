@@ -271,6 +271,10 @@ class HomerNavigationNode {
    * check_path_max_distance to robot */
   float m_check_path_max_distance;
 
+  /** do not replan if lisa avoids an obstacle, instead send target
+   * unreachable*/
+  bool m_no_replanning_on_collision;
+
   bool m_avoided_collision;
 
   float m_min_turn_angle;
