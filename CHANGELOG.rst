@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.8 (2016-11-21)
+------------------
 * Catch error case of obstacleMapDistance=0
 * Contributors: Malte Roosen
 
