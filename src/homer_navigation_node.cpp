@@ -531,6 +531,11 @@ void HomerNavigationNode::performNextMove() {
                      (float)(m_explorer->getObstacleTransform()->getValue(
                                  robotPixel.x(), robotPixel.y()) *
                              m_resolution));
+        if (obstacleMapDistance <= 0.00001) {
+          ROS_ERROR_STREAM(
+              "obstacleMapDistance is below threshold to 0 setting to 1");
+          obstacleMapDistance = 1;
+        }
       }
 
       float max_move_distance_speed =
