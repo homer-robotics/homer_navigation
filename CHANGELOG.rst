@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Catch error case of obstacleMapDistance=0
+* Contributors: Malte Roosen
+
 0.1.7 (2016-11-17)
 ------------------
 * Add a parameter to NavigateToPOI msgs to controll new behaviour (remove config parameter)
