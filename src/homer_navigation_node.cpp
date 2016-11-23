@@ -418,6 +418,11 @@ void HomerNavigationNode::performNextMove() {
       targetPositionReached();
       return;
     }
+    if (m_waypoints.size() == 0) {
+      ROS_WARN_STREAM(
+          "No waypoints but trying to perform next move! Skipping.");
+      return;
+    }
     // if we have accidentaly skipped waypoints, recalculate path
     float minDistance = FLT_MAX;
     float distance;
