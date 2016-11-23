@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>homer_navigation</name>
-  <version>0.1.8</version>
+  <version>0.1.9</version>
   <description>The homer_navigation package</description>
 
   <maintainer email="vseib@uni-koblenz.de">Viktor Seib</maintainer>

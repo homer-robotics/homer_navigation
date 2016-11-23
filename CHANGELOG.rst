@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.9 (2016-11-23)
+------------------
 * fix bug when first target is unreachable
 * Contributors: Malte Roosen
 
