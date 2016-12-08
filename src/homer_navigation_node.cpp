@@ -208,7 +208,7 @@ void HomerNavigationNode::calculatePath() {
     m_path_reaches_target = true;
     return;
   }
-  m_explorer->setOccupancyMap(m_width, m_width, m_origin,
+  m_explorer->setOccupancyMap(m_width, m_height, m_origin,
                               &(*m_last_map_data)[0]);
   m_explorer->setStart(
       map_tools::toMapCoords(m_robot_pose.position, m_origin, m_resolution));
@@ -271,7 +271,7 @@ void HomerNavigationNode::startNavigation() {
     maskMap();
   }
 
-  m_explorer->setOccupancyMap(m_width, m_width, m_origin,
+  m_explorer->setOccupancyMap(m_width, m_height, m_origin,
                               &(*m_last_map_data)[0]);
 
   // check if there still exists a path to the original target
@@ -896,10 +896,10 @@ void HomerNavigationNode::refreshParamsCallback(
 
 void HomerNavigationNode::mapCallback(
     const nav_msgs::OccupancyGrid::ConstPtr& msg) {
-  if (msg->info.height != msg->info.width) {
-    ROS_ERROR_STREAM("Incoming Map not quadratic. No map update!");
-    return;
-  }
+  //if (msg->info.height != msg->info.width) {
+    //ROS_ERROR_STREAM("Incoming Map not quadratic. No map update!");
+    //return;
+  //}
   if (m_last_map_data) {
     delete m_last_map_data;
   }
