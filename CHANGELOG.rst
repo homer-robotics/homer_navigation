@@ -2,6 +2,12 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* removed not used code
+* added support for not quadratic maps
+* Contributors: Lisa
+
 0.1.9 (2016-11-23)
 ------------------
 * fix bug when first target is unreachable
