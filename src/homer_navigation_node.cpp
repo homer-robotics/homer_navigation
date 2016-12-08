@@ -896,10 +896,6 @@ void HomerNavigationNode::refreshParamsCallback(
 
 void HomerNavigationNode::mapCallback(
     const nav_msgs::OccupancyGrid::ConstPtr& msg) {
-  //if (msg->info.height != msg->info.width) {
-    //ROS_ERROR_STREAM("Incoming Map not quadratic. No map update!");
-    //return;
-  //}
   if (m_last_map_data) {
     delete m_last_map_data;
   }
