@@ -4,6 +4,11 @@ Changelog for package homer_navigation
 
 Forthcoming
 -----------
+* no debug
+* cool changelogs
+* navigation with dynamic maps
+* Contributors: Lisa
+
 * navigation with dynamic maps
 * Contributors: Lisa
 
