@@ -2,6 +2,12 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* c++11
+* laser scan check path
+* Contributors: Florian Polster
+
 0.1.11 (2017-01-19)
 -------------------
 * no debug
