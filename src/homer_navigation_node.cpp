@@ -417,20 +417,33 @@ bool HomerNavigationNode::obstacleOnPath() {
         for (auto const& scan : m_scan_map) {
             std::vector<geometry_msgs::Point> scan_points;
             scan_points = map_tools::laser_msg_to_points(
-                scan.second, m_transform_listener, "/map");
+                    scan.second, m_transform_listener, "/map");
 
-            for (unsigned i = 0; i < m_pixel_path.size() - 1; i++) {
+            for (unsigned i = 1; i < m_pixel_path.size() - 1; i++) {
+                geometry_msgs::Point lp= 
+                    map_tools::fromMapCoords(m_pixel_path.at(i-1), m_map);
                 geometry_msgs::Point p =
                     map_tools::fromMapCoords(m_pixel_path.at(i), m_map);
                 if (map_tools::distance(m_robot_pose.position, p) >
-                    m_check_path_max_distance) {
+                        m_check_path_max_distance * 2) {
                     return false;
                 }
-                for (auto const& sp : scan_points) {
-                    if (map_tools::distance(sp, p) <
-                        m_AllowedObstacleDistance.first) {
-                        ROS_INFO_STREAM("Found obstacle");
-                        return true;
+                for(int k = 0; k < 4; k++)
+                {
+                    geometry_msgs::Point t;
+                    t.x =lp.x + (p.x - lp.x) * k/ 4.0; 
+                    t.y =lp.y + (p.y - lp.y) * k/ 4.0; 
+                    for(const auto &sp: scan_points)
+                    {
+
+                        if (map_tools::distance(sp, t) <
+                                m_AllowedObstacleDistance.first - m_map->info.resolution) {
+                            if(map_tools::distance(m_robot_pose.position, sp)< m_check_path_max_distance)
+                            {
+                                ROS_INFO_STREAM("Found obstacle");
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -593,12 +606,19 @@ void HomerNavigationNode::performNextMove() {
                                             m_obstacle_speed_factor;
             float max_map_distance_speed =
                 m_max_move_speed * obstacleMapDistance * m_map_speed_factor;
+
+            float max_waypoint_speed = 1;
+            if(m_waypoints.size() > 1)
+            {
+                float angleToNextWaypoint = angleToPointDeg(m_waypoints[1].pose.position);
+                max_waypoint_speed = (1 - (angleToNextWaypoint / 180.0)) * distanceToWaypoint * m_waypoint_speed_factor;
+            }
+
             m_act_speed = std::min(
                 {std::max((float)0.1, m_distance_to_target *
                                           m_target_distance_speed_factor),
                  m_max_move_speed, max_move_distance_speed,
-                 max_map_distance_speed,
-                 distanceToWaypoint * m_waypoint_speed_factor});
+                 max_map_distance_speed, max_waypoint_speed});
             std_msgs::String tmp;
             std::stringstream str;
             str << "m_obstacle_speed " << max_move_distance_speed

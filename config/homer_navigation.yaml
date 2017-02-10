@@ -17,7 +17,7 @@
 
 ### check path on map update
 /homer_navigation/check_path:                     true # toggles if the calculated path will be checked for obstacles while navigating
-/homer_navigation/check_path_max_distance:        2    # m maximal distance from robot position in which the path is being checked for obstacles
+/homer_navigation/check_path_max_distance:        3    # m maximal distance from robot position in which the path is being checked for obstacles
 
 ### speed parameters
 /homer_navigation/min_turn_angle:                 0.1 # rad values lower than this angle will let the navigation assume reaching the designated position   
@@ -29,7 +29,7 @@
 ### caution factors values near 0 mean high caution values greater values mean less caution
 ### if any factor equals 0 the robot can't follow paths !!
 /homer_navigation/map_speed_factor:               0.7 # factor for the max speed calculation of the obstacleDistancemap
-/homer_navigation/waypoint_speed_factor:          10  # factor for the max speed calculation with the distance to the next Waypoint
+/homer_navigation/waypoint_speed_factor:          2  # factor for the max speed calculation with the distance to the next Waypoint
 /homer_navigation/obstacle_speed_factor:          0.5  # factor for the max speed calculation with the last laser max movement distance
 /homer_navigation/target_distance_speed_factor:   0.4  # factor for the max speed calculation with the distance to target
 
