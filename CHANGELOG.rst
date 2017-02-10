@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.14 (2017-02-10)
+-------------------
 * changed check path and waypoint angle speed
 * Contributors: Lisa
 
