@@ -62,6 +62,7 @@ class HomerNavigationNode {
    protected:
     /** @brief Handles incoming messages. */
     void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+    void ignoreLaserCallback(const std_msgs::String::ConstPtr& msg);
     void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void laserDataCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
     void downlaserDataCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
@@ -83,6 +84,7 @@ class HomerNavigationNode {
     virtual void init();
 
     void initNewTarget();
+    void processLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg);
 
    private:
     /** @brief Start navigation to m_Target on  last_map_data_ */
@@ -219,6 +221,9 @@ class HomerNavigationNode {
     geometry_msgs::Pose m_robot_last_pose;
 
     std::map<std::string, sensor_msgs::LaserScan::ConstPtr> m_scan_map;
+    std::map<std::string, float> m_max_move_distances;
+
+    std::string m_ignore_scan;
 
     /** time stamp of the last incoming laser scan */
     ros::Time m_last_laser_time;
@@ -244,9 +249,6 @@ class HomerNavigationNode {
     float m_waypoint_sampling_threshold;
 
     float m_max_move_distance;
-    float m_max_move_sick;
-    float m_max_move_down;
-    float m_max_move_depth;
 
     /** if distance to nearest obstacle is below collision distance trigger
      * collision avoidance */
@@ -261,6 +263,9 @@ class HomerNavigationNode {
     /** if true, obstacles in path will be detected and path will be replanned
      */
     bool m_check_path;
+
+    bool m_obstacle_on_path;
+    geometry_msgs::Point m_obstacle_position;
 
     /** waypoints will only be checked for obstacles if they are closer than
      * check_path_max_distance to robot */
@@ -299,7 +304,6 @@ class HomerNavigationNode {
 
     bool m_path_reaches_target;
     bool m_initial_path_reaches_target;
-    int m_last_calculations_failed;
     int m_unknown_threshold;
 
     /** last map data */
@@ -321,6 +325,7 @@ class HomerNavigationNode {
     ros::Subscriber m_refresh_param_sub;
     ros::Subscriber m_max_move_depth_sub;
     ros::Subscriber m_move_base_simple_goal_sub;
+    ros::Subscriber m_ignore_laser_sub;
 
     // publishers
     ros::Publisher m_cmd_vel_pub;
