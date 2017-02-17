@@ -4,9 +4,9 @@
   <version>0.1.15</version>
   <description>The homer_navigation package</description>
 
-  <maintainer email="vseib@uni-koblenz.de">Viktor Seib</maintainer>
+  <maintainer email="fpolster@uni-koblenz.de">Florian Polster</maintainer>
+  <maintainer email="raphael@uni-koblenz.de">Raphael Memmesheimer</maintainer>
   <author email="mknauf@uni-koblenz.de">Malte Knauf</author>
-  <author email="fpolster@uni-koblenz.de">Florian Polster</author>
   <license>GPLv3</license>
 
   <buildtool_depend>catkin</buildtool_depend>
