@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>homer_navigation</name>
-  <version>0.1.15</version>
+  <version>0.1.16</version>
   <description>The homer_navigation package</description>
 
   <maintainer email="fpolster@uni-koblenz.de">Florian Polster</maintainer>
