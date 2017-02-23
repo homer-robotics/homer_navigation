@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* changed maintainer
+* Contributors: Raphael Memmesheimer
+
 0.1.15 (2017-02-16)
 -------------------
 * map_manager without laser scans
