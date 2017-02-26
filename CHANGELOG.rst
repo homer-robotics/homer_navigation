@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.17 (2017-02-26)
+-------------------
 * Eigen3 INCLUDE_DIR fix
 * Contributors: Niklas Yann Wettengel
 
