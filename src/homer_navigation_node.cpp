@@ -209,11 +209,16 @@ void HomerNavigationNode::idleProcess() {
     }
 }
 
+bool HomerNavigationNode::isInIgnoreList(std::string frame_id){
+    std::regex reg("(^|\\s)"+frame_id+"(\\s|$)"); 
+    return regex_match(m_ignore_scan, reg);
+}
+
 void HomerNavigationNode::setExplorerMap() {
     // adding lasers to map
     nav_msgs::OccupancyGrid temp_map = *m_map;
     for (const auto& scan : m_scan_map) {
-        if(m_ignore_scan.find(scan.second->header.frame_id) == std::string::npos){
+        if(!isInIgnoreList(scan.second->header.frame_id)){
             std::vector<geometry_msgs::Point> scan_points;
             scan_points = map_tools::laser_msg_to_points(
                     scan.second, m_transform_listener, "/map");
@@ -392,6 +397,9 @@ void HomerNavigationNode::sendTargetUnreachableMsg(int8_t reason) {
     m_MainMachine.setState(IDLE);
     homer_mapnav_msgs::TargetUnreachable unreachable_msg;
     unreachable_msg.reason = reason;
+    unreachable_msg.point = geometry_msgs::PointStamped();
+    unreachable_msg.point.header.frame_id = "/map";
+    unreachable_msg.point.point = m_obstacle_position;
     m_target_unreachable_pub.publish(unreachable_msg);
     m_waypoints.clear();
     ROS_INFO_STREAM("=== TargetUnreachableMsg ===");
@@ -416,7 +424,7 @@ bool HomerNavigationNode::obstacleOnPath() {
     m_last_check_path_time = ros::Time::now();
     if (m_pixel_path.size() != 0) {
         for (auto const& scan : m_scan_map) {
-            if(m_ignore_scan.find(scan.second->header.frame_id) == std::string::npos){
+            if(!isInIgnoreList(scan.second->header.frame_id)){
                 std::vector<geometry_msgs::Point> scan_points;
                 scan_points = map_tools::laser_msg_to_points(
                         scan.second, m_transform_listener, "/map");
@@ -1056,7 +1064,7 @@ void HomerNavigationNode::processLaserScan(const sensor_msgs::LaserScan::ConstPt
     m_last_laser_time = ros::Time::now();
     if(m_MainMachine.state() != IDLE)
     {
-        if(m_ignore_scan.find(msg->header.frame_id)== std::string::npos)
+        if(!isInIgnoreList(msg->header.frame_id))
         {
             m_max_move_distances[msg->header.frame_id] = map_tools::get_max_move_distance(
                     map_tools::laser_msg_to_points(msg, m_transform_listener, "/base_link"),

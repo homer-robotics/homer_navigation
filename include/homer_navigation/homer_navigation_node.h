@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include <ros/package.h>
 #include <ros/ros.h>
@@ -132,6 +133,8 @@ class HomerNavigationNode {
 
     /** @brief stops the Robot */
     void stopRobot();
+
+    bool isInIgnoreList(std::string frame_id);
 
     /**
      * @brief Sets each cell of the map to -1 outside the bounding box
