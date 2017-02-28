@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* reworked ignore laser and obstacle position feedback
+* Contributors: Lisa
+
 0.1.17 (2017-02-26)
 -------------------
 * Eigen3 INCLUDE_DIR fix
