@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.18 (2017-02-28)
+-------------------
 * reworked ignore laser and obstacle position feedback
 * Contributors: Lisa
 
