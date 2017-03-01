@@ -2,10 +2,10 @@
 #define FastNavigationModule_H
 
 #include <cmath>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <regex>
 
 #include <ros/package.h>
 #include <ros/ros.h>
@@ -91,6 +91,8 @@ class HomerNavigationNode {
     /** @brief Start navigation to m_Target on  last_map_data_ */
     void startNavigation();
 
+    geometry_msgs::Point calculateMeanPoint(
+        const std::vector<geometry_msgs::Point>& points);
     /** @brief Check if obstacles are blocking the way in last_map_data_ */
     bool obstacleOnPath();
 

@@ -34,8 +34,9 @@ HomerNavigationNode::HomerNavigationNode() {
     m_max_move_depth_sub = nh.subscribe<std_msgs::Float32>(
         "/homer_navigation/max_depth_move_distance", 1,
         &HomerNavigationNode::maxDepthMoveDistanceCallback, this);
-    m_ignore_laser_sub = nh.subscribe<std_msgs::String>("/homer_navigation/ignore_laser",1,&HomerNavigationNode::ignoreLaserCallback ,this);
-
+    m_ignore_laser_sub = nh.subscribe<std_msgs::String>(
+        "/homer_navigation/ignore_laser", 1,
+        &HomerNavigationNode::ignoreLaserCallback, this);
 
     m_cmd_vel_pub =
         nh.advertise<geometry_msgs::Twist>("/robot_platform/cmd_vel", 3);
@@ -156,9 +157,9 @@ void HomerNavigationNode::init() {
     m_ignore_scan = "";
 
     m_obstacle_on_path = false;
-    m_obstacle_position.x = 0; 
-    m_obstacle_position.y = 0; 
-    m_obstacle_position.z = 0; 
+    m_obstacle_position.x = 0;
+    m_obstacle_position.y = 0;
+    m_obstacle_position.z = 0;
 
     nav_msgs::OccupancyGrid tmp_map;
     tmp_map.header.frame_id = "/map";
@@ -209,8 +210,8 @@ void HomerNavigationNode::idleProcess() {
     }
 }
 
-bool HomerNavigationNode::isInIgnoreList(std::string frame_id){
-    std::regex reg("(^|\\s)"+frame_id+"(\\s|$)"); 
+bool HomerNavigationNode::isInIgnoreList(std::string frame_id) {
+    std::regex reg("(^|\\s)" + frame_id + "(\\s|$)");
     return regex_match(m_ignore_scan, reg);
 }
 
@@ -218,14 +219,16 @@ void HomerNavigationNode::setExplorerMap() {
     // adding lasers to map
     nav_msgs::OccupancyGrid temp_map = *m_map;
     for (const auto& scan : m_scan_map) {
-        if(!isInIgnoreList(scan.second->header.frame_id)){
+        if (!isInIgnoreList(scan.second->header.frame_id)) {
             std::vector<geometry_msgs::Point> scan_points;
             scan_points = map_tools::laser_msg_to_points(
-                    scan.second, m_transform_listener, "/map");
+                scan.second, m_transform_listener, "/map");
             for (const auto& point : scan_points) {
-                Eigen::Vector2i map_point = map_tools::toMapCoords(point, m_map);
+                Eigen::Vector2i map_point =
+                    map_tools::toMapCoords(point, m_map);
                 int index = map_point.y() * m_map->info.width + map_point.x();
-                if (index > 0 && index < m_map->info.width * m_map->info.height) {
+                if (index > 0 &&
+                    index < m_map->info.width * m_map->info.height) {
                     temp_map.data[index] = (int8_t)100;
                 }
             }
@@ -420,39 +423,61 @@ bool HomerNavigationNode::isTargetPositionReached() {
     }
 }
 
+geometry_msgs::Point HomerNavigationNode::calculateMeanPoint(
+    const std::vector<geometry_msgs::Point>& points) {
+    geometry_msgs::Point mean_point = geometry_msgs::Point();
+    for (auto const& point : points) {
+        mean_point.x += point.x;
+        mean_point.y += point.y;
+    }
+    if (points.size() > 0) {
+        mean_point.x /= points.size();
+        mean_point.y /= points.size();
+    }
+    return mean_point;
+}
+
 bool HomerNavigationNode::obstacleOnPath() {
     m_last_check_path_time = ros::Time::now();
-    if (m_pixel_path.size() != 0) {
-        for (auto const& scan : m_scan_map) {
-            if(!isInIgnoreList(scan.second->header.frame_id)){
-                std::vector<geometry_msgs::Point> scan_points;
-                scan_points = map_tools::laser_msg_to_points(
-                        scan.second, m_transform_listener, "/map");
+    if (m_pixel_path.size() == 0) {
+        ROS_DEBUG_STREAM("no path found for finding an obstacle");
+        return false;
+    }
+    std::vector<geometry_msgs::Point> obstacle_vec;
 
-                for (unsigned i = 1; i < m_pixel_path.size() - 1; i++) {
-                    geometry_msgs::Point lp = 
-                        map_tools::fromMapCoords(m_pixel_path.at(i-1), m_map);
-                    geometry_msgs::Point p =
-                        map_tools::fromMapCoords(m_pixel_path.at(i), m_map);
-                    if (map_tools::distance(m_robot_pose.position, p) >
-                            m_check_path_max_distance * 2) {
+    for (auto const& scan : m_scan_map) {
+        if (!isInIgnoreList(scan.second->header.frame_id)) {
+            std::vector<geometry_msgs::Point> scan_points;
+            scan_points = map_tools::laser_msg_to_points(
+                scan.second, m_transform_listener, "/map");
+
+            for (unsigned i = 1; i < m_pixel_path.size() - 1; i++) {
+                geometry_msgs::Point lp =
+                    map_tools::fromMapCoords(m_pixel_path.at(i - 1), m_map);
+                geometry_msgs::Point p =
+                    map_tools::fromMapCoords(m_pixel_path.at(i), m_map);
+                if (map_tools::distance(m_robot_pose.position, p) >
+                    m_check_path_max_distance * 2) {
+                    if (obstacle_vec.size() > 0) {
+                        m_obstacle_position = calculateMeanPoint(obstacle_vec);
+                        ROS_DEBUG_STREAM(
+                            "found obstacle at: " << m_obstacle_position);
+                        return true;
+                    } else {
                         return false;
                     }
-                    for(int k = 0; k < 4; k++)
-                    {
-                        geometry_msgs::Point t;
-                        t.x = lp.x + (p.x - lp.x) * k/ 4.0; 
-                        t.y = lp.y + (p.y - lp.y) * k/ 4.0; 
-                        for(const auto &sp: scan_points)
-                        {
-                            if (map_tools::distance(sp, t) <
-                                    m_AllowedObstacleDistance.first - m_map->info.resolution) {
-                                if(map_tools::distance(m_robot_pose.position, sp) < m_check_path_max_distance)
-                                {
-                                    m_obstacle_position = t;
-                                    ROS_INFO_STREAM("Found obstacle");
-                                    return true;
-                                }
+                }
+                for (int k = 0; k < 4; k++) {
+                    geometry_msgs::Point t;
+                    t.x = lp.x + (p.x - lp.x) * k / 4.0;
+                    t.y = lp.y + (p.y - lp.y) * k / 4.0;
+                    for (const auto& sp : scan_points) {
+                        if (map_tools::distance(sp, t) <
+                            m_AllowedObstacleDistance.first -
+                                m_map->info.resolution) {
+                            if (map_tools::distance(m_robot_pose.position, sp) <
+                                m_check_path_max_distance) {
+                                obstacle_vec.push_back(sp);
                             }
                         }
                     }
@@ -460,7 +485,13 @@ bool HomerNavigationNode::obstacleOnPath() {
             }
         }
     }
-    return false;
+    if (obstacle_vec.size() > 0) {
+        m_obstacle_position = calculateMeanPoint(obstacle_vec);
+        ROS_DEBUG_STREAM("found obstacle at: " << m_obstacle_position);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void HomerNavigationNode::performNextMove() {
@@ -473,14 +504,11 @@ void HomerNavigationNode::performNextMove() {
             (ros::Time::now() - m_last_check_path_time) > ros::Duration(0.2)) {
             if (obstacleOnPath()) {
                 if (m_seen_obstacle_before) {
-                    if(!m_obstacle_on_path)
-                    {
+                    if (!m_obstacle_on_path) {
                         stopRobot();
                         calculatePath();
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         calculatePath();
                     }
                 }
@@ -594,18 +622,18 @@ void HomerNavigationNode::performNextMove() {
             }
         } else if (fabs(angle) > m_max_drive_angle) {
             m_act_speed = 0.0;
-        } else if (m_obstacle_on_path && map_tools::distance(m_robot_pose.position, m_obstacle_position) < 1.0 )
-        {
+        } else if (m_obstacle_on_path &&
+                   map_tools::distance(m_robot_pose.position,
+                                       m_obstacle_position) < 1.0) {
             m_act_speed = 0.0;
             float angleToWaypoint2 = angleToPointDeg(m_obstacle_position);
             if (angleToWaypoint2 < -180) {
                 angleToWaypoint2 += 360;
             }
             angle = deg2Rad(angleToWaypoint2);
-            
-            if(std::fabs(angle) < m_min_turn_angle)
-            {
-                ROS_INFO_STREAM("angle = "<<angle);
+
+            if (std::fabs(angle) < m_min_turn_angle) {
+                ROS_INFO_STREAM("angle = " << angle);
                 m_avoided_collision = true;
                 m_initial_path_reaches_target = true;
                 m_stop_before_obstacle = true;
@@ -644,10 +672,12 @@ void HomerNavigationNode::performNextMove() {
                 m_max_move_speed * obstacleMapDistance * m_map_speed_factor;
 
             float max_waypoint_speed = 1;
-            if(m_waypoints.size() > 1)
-            {
-                float angleToNextWaypoint = angleToPointDeg(m_waypoints[1].pose.position);
-                max_waypoint_speed = (1 - (angleToNextWaypoint / 180.0)) * distanceToWaypoint * m_waypoint_speed_factor;
+            if (m_waypoints.size() > 1) {
+                float angleToNextWaypoint =
+                    angleToPointDeg(m_waypoints[1].pose.position);
+                max_waypoint_speed = (1 - (angleToNextWaypoint / 180.0)) *
+                                     distanceToWaypoint *
+                                     m_waypoint_speed_factor;
             }
 
             m_act_speed = std::min(
@@ -1028,10 +1058,8 @@ void HomerNavigationNode::poseCallback(
 }
 
 void HomerNavigationNode::calcMaxMoveDist() {
-
     m_max_move_distance = 99;
-    for(auto d: m_max_move_distances)
-    {
+    for (auto d : m_max_move_distances) {
         m_max_move_distance = std::min(m_max_move_distance, d.second);
     }
     if (m_max_move_distance <= m_collision_distance &&
@@ -1047,8 +1075,9 @@ void HomerNavigationNode::calcMaxMoveDist() {
     }
 }
 
-void HomerNavigationNode::ignoreLaserCallback(const std_msgs::String::ConstPtr& msg){
-    ROS_INFO_STREAM("changed ignore laser to: "<<msg->data);
+void HomerNavigationNode::ignoreLaserCallback(
+    const std_msgs::String::ConstPtr& msg) {
+    ROS_INFO_STREAM("changed ignore laser to: " << msg->data);
     m_ignore_scan = msg->data;
 }
 
@@ -1058,25 +1087,22 @@ void HomerNavigationNode::maxDepthMoveDistanceCallback(
     calcMaxMoveDist();
 }
 
-void HomerNavigationNode::processLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
-{
+void HomerNavigationNode::processLaserScan(
+    const sensor_msgs::LaserScan::ConstPtr& msg) {
     m_scan_map[msg->header.frame_id] = msg;
     m_last_laser_time = ros::Time::now();
-    if(m_MainMachine.state() != IDLE)
-    {
-        if(!isInIgnoreList(msg->header.frame_id))
-        {
-            m_max_move_distances[msg->header.frame_id] = map_tools::get_max_move_distance(
-                    map_tools::laser_msg_to_points(msg, m_transform_listener, "/base_link"),
+    if (m_MainMachine.state() != IDLE) {
+        if (!isInIgnoreList(msg->header.frame_id)) {
+            m_max_move_distances[msg->header.frame_id] =
+                map_tools::get_max_move_distance(
+                    map_tools::laser_msg_to_points(msg, m_transform_listener,
+                                                   "/base_link"),
                     m_min_x, m_min_y);
-        }
-        else 
-        {
+        } else {
             m_max_move_distances[msg->header.frame_id] = 99;
         }
         calcMaxMoveDist();
     }
-
 }
 
 void HomerNavigationNode::laserDataCallback(
