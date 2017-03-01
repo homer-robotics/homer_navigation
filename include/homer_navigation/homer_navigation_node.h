@@ -66,7 +66,6 @@ class HomerNavigationNode {
     void ignoreLaserCallback(const std_msgs::String::ConstPtr& msg);
     void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void laserDataCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
-    void downlaserDataCallback(const sensor_msgs::LaserScan::ConstPtr& msg);
     void startNavigationCallback(
         const homer_mapnav_msgs::StartNavigation::ConstPtr& msg);
     void moveBaseSimpleGoalCallback(
@@ -85,7 +84,6 @@ class HomerNavigationNode {
     virtual void init();
 
     void initNewTarget();
-    void processLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg);
 
    private:
     /** @brief Start navigation to m_Target on  last_map_data_ */

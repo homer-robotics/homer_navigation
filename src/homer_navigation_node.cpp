@@ -11,7 +11,7 @@ HomerNavigationNode::HomerNavigationNode() {
     m_laser_data_sub = nh.subscribe<sensor_msgs::LaserScan>(
         "/scan", 1, &HomerNavigationNode::laserDataCallback, this);
     m_down_laser_data_sub = nh.subscribe<sensor_msgs::LaserScan>(
-        "/front_scan", 1, &HomerNavigationNode::downlaserDataCallback, this);
+        "/front_scan", 1, &HomerNavigationNode::laserDataCallback, this);
     m_start_navigation_sub = nh.subscribe<homer_mapnav_msgs::StartNavigation>(
         "/homer_navigation/start_navigation", 1,
         &HomerNavigationNode::startNavigationCallback, this);
@@ -1087,7 +1087,7 @@ void HomerNavigationNode::maxDepthMoveDistanceCallback(
     calcMaxMoveDist();
 }
 
-void HomerNavigationNode::processLaserScan(
+void HomerNavigationNode::laserDataCallback(
     const sensor_msgs::LaserScan::ConstPtr& msg) {
     m_scan_map[msg->header.frame_id] = msg;
     m_last_laser_time = ros::Time::now();
@@ -1103,16 +1103,6 @@ void HomerNavigationNode::processLaserScan(
         }
         calcMaxMoveDist();
     }
-}
-
-void HomerNavigationNode::laserDataCallback(
-    const sensor_msgs::LaserScan::ConstPtr& msg) {
-    processLaserScan(msg);
-}
-
-void HomerNavigationNode::downlaserDataCallback(
-    const sensor_msgs::LaserScan::ConstPtr& msg) {
-    processLaserScan(msg);
 }
 
 void HomerNavigationNode::initNewTarget() {
