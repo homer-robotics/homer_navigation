@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.19 (2017-03-02)
+-------------------
 * maskMap disabled because not functional at the moment
 * no seperate laserCallback
 * give position information of obstacle in target unreachable message
