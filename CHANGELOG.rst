@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.21 (2017-03-21)
+-------------------
 * autoformat
 * Contributors: Niklas Yann Wettengel
 
