@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* autoformat
+* Contributors: Niklas Yann Wettengel
+
 0.1.19 (2017-03-02)
 -------------------
 * maskMap disabled because not functional at the moment
