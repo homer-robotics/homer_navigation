@@ -98,6 +98,10 @@ private:
   /** @brief Start navigation to m_Target on  last_map_data_ */
   void startNavigation();
 
+  void followPath();
+  void avoidingCollision();
+  void finalTurn();
+
   geometry_msgs::Point
   calculateMeanPoint(const std::vector<geometry_msgs::Point>& points);
   /** @brief Check if obstacles are blocking the way in last_map_data_ */
