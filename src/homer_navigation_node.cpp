@@ -52,7 +52,6 @@ HomerNavigationNode::HomerNavigationNode()
       "/ptu/center_world_point", 3);
   m_set_pan_tilt_pub =
       nh.advertise<homer_ptu_msgs::SetPanTilt>("/ptu/set_pan_tilt", 3);
-  m_debug_pub = nh.advertise<std_msgs::String>("/homer_navigation/debug", 3);
 
   m_get_POIs_client = nh.serviceClient<homer_mapnav_msgs::GetPointsOfInterest>(
       "/map_manager/get_pois");
@@ -532,6 +531,26 @@ bool HomerNavigationNode::obstacleOnPath()
   }
 }
 
+float HomerNavigationNode::getMaxLaserDistance()
+{
+  float min = 10;
+  for (auto const& scan : m_scan_map)
+  {
+    if (!isInIgnoreList(scan.second->header.frame_id))
+    {
+      for (auto const& range : scan.second->ranges)
+      {
+        if (range < min && range > scan.second->range_min &&
+            range < scan.second->range_max)
+        {
+          min = range;
+        }
+      }
+    }
+  }
+  return min;
+}
+
 void HomerNavigationNode::followPath()
 {
   if (isTargetPositionReached())
@@ -674,7 +693,7 @@ void HomerNavigationNode::followPath()
   }
   float angle = deg2Rad(angleToWaypoint);
 
-  // linear speed calculation
+  // LINEAR SPEED CALCULATION
   if (m_avoided_collision)
   {
     if (std::fabs(angleToWaypoint) < 10)
@@ -710,38 +729,11 @@ void HomerNavigationNode::followPath()
   }
   else
   {
-    // float obstacleMapDistance = 1;
-    // for (int wpi = -1; wpi < std::min((int)m_waypoints.size(), (int)2);
-    // wpi++)
-    //{
-    // Eigen::Vector2i robotPixel;
-    // if (wpi == -1)
-    //{
-    // robotPixel = map_tools::toMapCoords(m_robot_pose.position, m_map);
-    //}
-    // else
-    //{
-    // robotPixel =
-    // map_tools::toMapCoords(m_waypoints[wpi].pose.position, m_map);
-    //}
-    // obstacleMapDistance =
-    // std::min((float)obstacleMapDistance,
-    //(float)(m_explorer->getObstacleTransform()->getValue(
-    // robotPixel.x(), robotPixel.y()) *
-    // m_map->info.resolution));
-    // if (obstacleMapDistance <= 0.00001)
-    //{
-    // ROS_ERROR_STREAM(
-    //"obstacleMapDistance is below threshold to 0 setting "
-    //"to 1");
-    // obstacleMapDistance = 1;
-    //}
-    //}
-
     float max_move_distance_speed =
         m_max_move_speed * m_max_move_distance * m_obstacle_speed_factor;
-    float max_map_distance_speed = 1;
-    // m_max_move_speed * obstacleMapDistance * m_map_speed_factor;
+
+    float max_laser_speed =
+        getMaxLaserDistance() * m_map_speed_factor * m_max_move_speed;
 
     float max_waypoint_speed = 1;
     if (m_waypoints.size() > 1)
@@ -751,38 +743,24 @@ void HomerNavigationNode::followPath()
                            distanceToWaypoint * m_waypoint_speed_factor;
     }
 
-    m_act_speed =
-        std::min({ std::max((float)0.1, m_distance_to_target *
-                                            m_target_distance_speed_factor),
-                   m_max_move_speed, max_move_distance_speed,
-                   max_map_distance_speed, max_waypoint_speed });
-    std_msgs::String tmp;
-    std::stringstream str;
-    str << "m_obstacle_speed " << max_move_distance_speed
-        << " max_map_distance_speed " << max_map_distance_speed;
-    tmp.data = str.str();
-    m_debug_pub.publish(tmp);
+    float max_distance_to_target_speed = std::max(
+        (float)0.1, m_distance_to_target * m_target_distance_speed_factor);
+
+    m_act_speed = std::min({ max_distance_to_target_speed, m_max_move_speed,
+                             max_move_distance_speed, max_waypoint_speed,
+                             max_laser_speed });
   }
 
   // angular speed calculation
   if (angle < 0)
   {
-    angle = std::max(angle * (float)0.8, -m_max_turn_speed);
-    m_act_speed = m_act_speed + angle / 2.0;
-    if (m_act_speed < 0)
-    {
-      m_act_speed = 0;
-    }
+    angle = std::max(angle, -m_max_turn_speed);
   }
   else
   {
-    angle = std::min(angle * (float)0.8, m_max_turn_speed);
-    m_act_speed = m_act_speed - angle / 2.0;
-    if (m_act_speed < 0)
-    {
-      m_act_speed = 0;
-    }
+    angle = std::min(angle, m_max_turn_speed);
   }
+
   geometry_msgs::Twist cmd_vel_msg;
   cmd_vel_msg.linear.x = m_act_speed;
   cmd_vel_msg.angular.z = angle;
@@ -792,13 +770,12 @@ void HomerNavigationNode::followPath()
                    << std::endl
                    << "linear: " << m_act_speed << " angular: " << angle
                    << std::endl
-                   << "distanceToWaypoint:" << distanceToWaypoint
-                   << "angleToWaypoint: " << angleToWaypoint << std::endl);
+                   << "distanceToWaypoint: " << distanceToWaypoint << std::endl
+                   << " angleToWaypoint: " << angleToWaypoint << std::endl);
 }
 
 void HomerNavigationNode::avoidingCollision()
 {
-  avoidingCollision();
   if (isTargetPositionReached())
   {
     return;

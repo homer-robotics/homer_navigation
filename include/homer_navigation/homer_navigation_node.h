@@ -98,6 +98,7 @@ private:
   /** @brief Start navigation to m_Target on  last_map_data_ */
   void startNavigation();
 
+  float getMaxLaserDistance();
   void followPath();
   void avoidingCollision();
   void finalTurn();
@@ -357,7 +358,6 @@ private:
   ros::Publisher m_path_pub;
   ros::Publisher m_ptu_center_world_point_pub;
   ros::Publisher m_set_pan_tilt_pub;
-  ros::Publisher m_debug_pub;
 
   // service clients
   ros::ServiceClient m_get_POIs_client;
