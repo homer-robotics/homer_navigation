@@ -90,6 +90,8 @@ protected:
   /** @brief Is called when all modules are loaded and thread has started. */
   virtual void init();
 
+  void initExplorer();
+
   void initNewTarget();
 
 private:

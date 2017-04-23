@@ -6,53 +6,53 @@ HomerNavigationNode::HomerNavigationNode()
 
   // subscribers
   m_map_sub = nh.subscribe<nav_msgs::OccupancyGrid>(
-      "/map", 1, &HomerNavigationNode::mapCallback, this);
+      "/map", 3, &HomerNavigationNode::mapCallback, this);
   m_pose_sub = nh.subscribe<geometry_msgs::PoseStamped>(
-      "/pose", 1, &HomerNavigationNode::poseCallback, this);
+      "/pose", 3, &HomerNavigationNode::poseCallback, this);
   m_laser_data_sub = nh.subscribe<sensor_msgs::LaserScan>(
-      "/scan", 1, &HomerNavigationNode::laserDataCallback, this);
+      "/scan", 3, &HomerNavigationNode::laserDataCallback, this);
   m_down_laser_data_sub = nh.subscribe<sensor_msgs::LaserScan>(
-      "/front_scan", 1, &HomerNavigationNode::laserDataCallback, this);
+      "/front_scan", 3, &HomerNavigationNode::laserDataCallback, this);
   m_start_navigation_sub = nh.subscribe<homer_mapnav_msgs::StartNavigation>(
-      "/homer_navigation/start_navigation", 1,
+      "/homer_navigation/start_navigation", 3,
       &HomerNavigationNode::startNavigationCallback, this);
   m_move_base_simple_goal_sub = nh.subscribe<geometry_msgs::PoseStamped>(
-      "/move_base_simple/goal", 1,
+      "/move_base_simple/goal", 3,
       &HomerNavigationNode::moveBaseSimpleGoalCallback,
       this);  // for RVIZ usage
   m_stop_navigation_sub = nh.subscribe<std_msgs::Empty>(
-      "/homer_navigation/stop_navigation", 1,
+      "/homer_navigation/stop_navigation", 3,
       &HomerNavigationNode::stopNavigationCallback, this);
   m_navigate_to_poi_sub = nh.subscribe<homer_mapnav_msgs::NavigateToPOI>(
-      "/homer_navigation/navigate_to_POI", 1,
+      "/homer_navigation/navigate_to_POI", 3,
       &HomerNavigationNode::navigateToPOICallback, this);
   m_unknown_threshold_sub = nh.subscribe<std_msgs::Int8>(
-      "/homer_navigation/unknown_threshold", 1,
+      "/homer_navigation/unknown_threshold", 3,
       &HomerNavigationNode::unknownThresholdCallback, this);
   m_refresh_param_sub = nh.subscribe<std_msgs::Empty>(
-      "/homer_navigation/refresh_params", 1,
+      "/homer_navigation/refresh_params", 3,
       &HomerNavigationNode::refreshParamsCallback, this);
   m_max_move_depth_sub = nh.subscribe<std_msgs::Float32>(
-      "/homer_navigation/max_depth_move_distance", 1,
+      "/homer_navigation/max_depth_move_distance", 3,
       &HomerNavigationNode::maxDepthMoveDistanceCallback, this);
   m_ignore_laser_sub = nh.subscribe<std_msgs::String>(
-      "/homer_navigation/ignore_laser", 1,
+      "/homer_navigation/ignore_laser", 3,
       &HomerNavigationNode::ignoreLaserCallback, this);
 
   m_cmd_vel_pub =
       nh.advertise<geometry_msgs::Twist>("/robot_platform/cmd_vel", 3);
   m_target_reached_string_pub =
-      nh.advertise<std_msgs::String>("/homer_navigation/target_reached", 1);
+      nh.advertise<std_msgs::String>("/homer_navigation/target_reached", 3);
   // m_target_reached_empty_pub 	=
-  // nh.advertise<std_msgs::Empty>("/homer_navigation/target_reached", 1);
+  // nh.advertise<std_msgs::Empty>("/homer_navigation/target_reached", 3);
   m_target_unreachable_pub = nh.advertise<homer_mapnav_msgs::TargetUnreachable>(
-      "/homer_navigation/target_unreachable", 1);
-  m_path_pub = nh.advertise<nav_msgs::Path>("/homer_navigation/path", 1);
+      "/homer_navigation/target_unreachable", 3);
+  m_path_pub = nh.advertise<nav_msgs::Path>("/homer_navigation/path", 3);
   m_ptu_center_world_point_pub = nh.advertise<homer_ptu_msgs::CenterWorldPoint>(
-      "/ptu/center_world_point", 1);
+      "/ptu/center_world_point", 3);
   m_set_pan_tilt_pub =
-      nh.advertise<homer_ptu_msgs::SetPanTilt>("/ptu/set_pan_tilt", 1);
-  m_debug_pub = nh.advertise<std_msgs::String>("/homer_navigation/debug", 1);
+      nh.advertise<homer_ptu_msgs::SetPanTilt>("/ptu/set_pan_tilt", 3);
+  m_debug_pub = nh.advertise<std_msgs::String>("/homer_navigation/debug", 3);
 
   m_get_POIs_client = nh.serviceClient<homer_mapnav_msgs::GetPointsOfInterest>(
       "/map_manager/get_pois");
@@ -137,14 +137,13 @@ void HomerNavigationNode::loadParameters()
   {
     delete m_explorer;
   }
+  initExplorer();
 }
 
 void HomerNavigationNode::init()
 {
   m_explorer = 0;
-  m_robot_pose.position.x = 0.0;
-  m_robot_pose.position.y = 0.0;
-  m_robot_pose.position.z = 0.0;
+  m_robot_pose = geometry_msgs::Pose();
   m_robot_pose.orientation = tf::createQuaternionMsgFromYaw(0.0);
   m_robot_last_pose = m_robot_pose;
   m_avoided_collision = false;
@@ -154,18 +153,10 @@ void HomerNavigationNode::init()
   m_ignore_scan = "";
 
   m_obstacle_on_path = false;
-  m_obstacle_position.x = 0;
-  m_obstacle_position.y = 0;
-  m_obstacle_position.z = 0;
+  m_obstacle_position = geometry_msgs::Point();
 
-  nav_msgs::OccupancyGrid tmp_map;
+  nav_msgs::OccupancyGrid tmp_map = nav_msgs::OccupancyGrid();
   tmp_map.header.frame_id = "/map";
-  tmp_map.info.resolution = 0;
-  tmp_map.info.width = 0;
-  tmp_map.info.height = 0;
-  tmp_map.info.origin.position.x = 0;
-  tmp_map.info.origin.position.y = 0;
-  tmp_map.info.origin.position.z = 0;
   m_map = boost::make_shared<nav_msgs::OccupancyGrid>(tmp_map);
 
   loadParameters();
@@ -184,14 +175,9 @@ HomerNavigationNode::~HomerNavigationNode()
 void HomerNavigationNode::stopRobot()
 {
   m_act_speed = 0;
-  geometry_msgs::Twist cmd_vel_msg;
-  cmd_vel_msg.linear.x = 0;
-  cmd_vel_msg.linear.y = 0;
-  cmd_vel_msg.angular.z = 0;
+  geometry_msgs::Twist cmd_vel_msg = geometry_msgs::Twist();
   m_cmd_vel_pub.publish(cmd_vel_msg);
-  // ros::Duration(0.1).sleep();
   m_cmd_vel_pub.publish(cmd_vel_msg);
-  // ros::Duration(0.1).sleep();
   m_cmd_vel_pub.publish(cmd_vel_msg);
 }
 
@@ -262,7 +248,7 @@ void HomerNavigationNode::calculatePath()
     return;
   }
 
-  // setExplorerMap();
+  setExplorerMap();
   m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
 
   bool success;
@@ -1182,20 +1168,28 @@ void HomerNavigationNode::refreshParamsCallback(
   loadParameters();
 }
 
-void HomerNavigationNode::mapCallback(
-    const nav_msgs::OccupancyGrid::ConstPtr& msg)
+void HomerNavigationNode::initExplorer()
 {
   if (!m_explorer)
   {
-    float resolution = msg->info.resolution;
-    m_explorer = new Explorer(m_AllowedObstacleDistance.first / resolution,
-                              m_AllowedObstacleDistance.second / resolution,
-                              m_SafeObstacleDistance.first / resolution,
-                              m_SafeObstacleDistance.second / resolution,
-                              m_SafePathWeight, m_FrontierSafenessFactor,
-                              m_unknown_threshold);
+      if (m_map->info.resolution != 0)
+      {
+          float resolution = m_map->info.resolution;
+          m_explorer = new Explorer(m_AllowedObstacleDistance.first / resolution,
+                  m_AllowedObstacleDistance.second / resolution,
+                  m_SafeObstacleDistance.first / resolution,
+                  m_SafeObstacleDistance.second / resolution,
+                  m_SafePathWeight, m_FrontierSafenessFactor,
+                  m_unknown_threshold);
+      }
   }
+}
+
+void HomerNavigationNode::mapCallback(
+    const nav_msgs::OccupancyGrid::ConstPtr& msg)
+{
   m_map = msg;
+  initExplorer();
   if (m_MainMachine.state() != IDLE)
   {
     setExplorerMap();
