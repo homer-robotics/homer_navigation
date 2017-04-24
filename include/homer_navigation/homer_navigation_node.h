@@ -35,7 +35,7 @@
 class Explorer;
 /**
  * @class  HomerNavigationNode
- * @author Malte Knauf, Stephan Wirth, David Gossow (RX), Florian Polster
+ * @author Malte Knauf, Stephan Wirth, David Gossow (RX), Florian Polster (R28)
  * @brief  Performs autonomous navigation
  */
 class HomerNavigationNode
