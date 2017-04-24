@@ -5,7 +5,6 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   roslib
-  homer_robbie_architecture
   nav_msgs
   sensor_msgs
   homer_mapnav_msgs
@@ -29,7 +28,6 @@ catkin_package(
   CATKIN_DEPENDS
   	roscpp
 	roslib
-	homer_robbie_architecture
 	nav_msgs
 	sensor_msgs
 	homer_mapnav_msgs

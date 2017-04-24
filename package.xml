@@ -13,7 +13,6 @@
   
   <build_depend>roscpp</build_depend>
   <build_depend>roslib</build_depend>
-  <build_depend>homer_robbie_architecture</build_depend>
   <build_depend>homer_nav_libs</build_depend>
   <build_depend>nav_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
@@ -26,7 +25,6 @@
   
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
-  <run_depend>homer_robbie_architecture</run_depend>
   <run_depend>homer_nav_libs</run_depend>
   <run_depend>nav_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>

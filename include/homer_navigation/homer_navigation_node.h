@@ -12,8 +12,6 @@
 
 #include <tf/transform_listener.h>
 
-#include <homer_robbie_architecture/Architecture/StateMachine/StateMachine.h>
-
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <homer_mapnav_msgs/GetPointsOfInterest.h>
@@ -53,6 +51,8 @@ public:
     AVOIDING_COLLISION,
     FINAL_TURN
   };
+
+  ProcessState m_state;
 
   /**
    * The constructor
@@ -98,10 +98,13 @@ private:
   /** @brief Start navigation to m_Target on  last_map_data_ */
   void startNavigation();
 
-  float getMaxLaserDistance();
+  float getMinLaserDistance();
   void followPath();
   void avoidingCollision();
   void finalTurn();
+  bool checkWaypoints();
+  bool updateSpeeds();
+  bool checkForObstacles();
 
   geometry_msgs::Point
   calculateMeanPoint(const std::vector<geometry_msgs::Point>& points);
@@ -203,9 +206,6 @@ private:
 
   /// @brief Worker instances
   Explorer* m_explorer;
-
-  /// @brief State machine
-  StateMachine<ProcessState> m_MainMachine;
 
   /// @brief Navigation options & data
 
@@ -309,7 +309,6 @@ private:
   float m_waypoint_radius_factor;
 
   float m_distance_to_target;
-  float m_act_speed;
   float m_angular_avoidance;
 
   float m_map_speed_factor;
@@ -328,6 +327,8 @@ private:
   bool m_path_reaches_target;
   bool m_initial_path_reaches_target;
   int m_unknown_threshold;
+
+  geometry_msgs::Twist m_cmd_vel;
 
   /** last map data */
   nav_msgs::OccupancyGrid::ConstPtr m_map;
