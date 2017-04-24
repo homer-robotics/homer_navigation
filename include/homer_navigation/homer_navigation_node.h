@@ -292,6 +292,8 @@ private:
   float m_check_path_max_distance;
   ros::Time m_last_check_path_time;
 
+  ros::Time m_unreachable_delay;
+
   /** do not replan if lisa avoids an obstacle, instead send target
    * unreachable*/
   bool m_stop_before_obstacle;
