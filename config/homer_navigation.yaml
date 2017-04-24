@@ -25,7 +25,7 @@
 /homer_navigation/min_turn_speed:                 0.2  # rad/s min turn speed for Final Turn so the Robot doesn't stop turning
 /homer_navigation/max_drive_angle:                0.4  # rad threshold for driving and turning - if above that value only turn
 
-/homer_navigation/max_move_speed:                 1.0  # m/s   max move speed the navigation can send
+/homer_navigation/max_move_speed:                 0.8  # m/s   max move speed the navigation can send
 ### caution factors values near 0 mean high caution values greater values mean less caution
 ### if any factor equals 0 the robot can't follow paths !!
 /homer_navigation/map_speed_factor:               0.7 # factor for the max speed calculation of the obstacleDistancemap
