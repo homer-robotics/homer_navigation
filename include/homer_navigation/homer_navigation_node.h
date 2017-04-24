@@ -212,9 +212,6 @@ private:
   /** list of waypoints subsampled from m_PixelPath */
   std::vector<geometry_msgs::PoseStamped> m_waypoints;
 
-  /** Path planned by Explorer, pixel accuracy */
-  std::vector<Eigen::Vector2i> m_pixel_path;
-
   /** target point */
   geometry_msgs::Point m_target_point;
 
@@ -354,7 +351,6 @@ private:
   // publishers
   ros::Publisher m_cmd_vel_pub;
   ros::Publisher m_target_reached_string_pub;
-  // ros::Publisher  m_target_reached_empty_pub;
   ros::Publisher m_target_unreachable_pub;
   ros::Publisher m_path_pub;
   ros::Publisher m_ptu_center_world_point_pub;

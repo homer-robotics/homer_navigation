@@ -245,7 +245,7 @@ void HomerNavigationNode::calculatePath()
   m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
 
   bool success;
-  m_pixel_path = m_explorer->getPath(success);
+  std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
   if (!success)
   {
     ROS_WARN_STREAM("no path to target possible - drive to obstacle");
@@ -255,7 +255,7 @@ void HomerNavigationNode::calculatePath()
   {
     m_obstacle_on_path = false;
     std::vector<Eigen::Vector2i> waypoint_pixels =
-        m_explorer->sampleWaypointsFromPath(m_pixel_path,
+        m_explorer->sampleWaypointsFromPath(tmp_pixel_path,
                                             m_waypoint_sampling_threshold);
     m_waypoints.clear();
     ROS_INFO_STREAM("homer_navigation::calculatePath - Path Size: "
@@ -321,7 +321,7 @@ void HomerNavigationNode::startNavigation()
     m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
 
     bool success;
-    m_pixel_path = m_explorer->getPath(success);
+    std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
     if (!success)
     {
       ROS_INFO_STREAM(
@@ -457,7 +457,7 @@ geometry_msgs::Point HomerNavigationNode::calculateMeanPoint(
 bool HomerNavigationNode::obstacleOnPath()
 {
   m_last_check_path_time = ros::Time::now();
-  if (m_pixel_path.size() == 0)
+  if (m_waypoints.size() == 0)
   {
     ROS_DEBUG_STREAM("no path found for finding an obstacle");
     return false;
@@ -472,12 +472,10 @@ bool HomerNavigationNode::obstacleOnPath()
       scan_points = map_tools::laser_msg_to_points(
           scan.second, m_transform_listener, "/map");
 
-      for (unsigned i = 1; i < m_pixel_path.size() - 1; i++)
+      for (unsigned i = 1; i < m_waypoints.size() - 1; i++)
       {
-        geometry_msgs::Point lp =
-            map_tools::fromMapCoords(m_pixel_path.at(i - 1), m_map);
-        geometry_msgs::Point p =
-            map_tools::fromMapCoords(m_pixel_path.at(i), m_map);
+        geometry_msgs::Point lp = m_waypoints.at(i - 1).pose.position;
+        geometry_msgs::Point p = m_waypoints.at(i).pose.position;
         if (map_tools::distance(m_robot_pose.position, p) >
             m_check_path_max_distance * 2)
         {
