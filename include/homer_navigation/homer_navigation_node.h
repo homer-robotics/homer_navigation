@@ -153,6 +153,8 @@ private:
 
   bool isInIgnoreList(std::string frame_id);
 
+  void filterScanPoints(std::vector<geometry_msgs::Point>& points );
+
   /**
    * @brief Sets each cell of the map to -1 outside the bounding box
    *        containing the robot pose and the current target
