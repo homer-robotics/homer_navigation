@@ -232,8 +232,30 @@ void HomerNavigationNode::setExplorerMap()
       boost::make_shared<nav_msgs::OccupancyGrid>(temp_map));
 }
 
-void HomerNavigationNode::samplePath()
+void HomerNavigationNode::calculatePath()
 {
+  if (!m_explorer)
+  {
+    return;
+  }
+  if (isTargetPositionReached())
+  {
+    return;
+  }
+
+  setExplorerMap();
+  m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
+
+  bool success;
+  std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
+  if (!success)
+  {
+    ROS_WARN_STREAM("no path to target possible - drive to obstacle");
+    m_obstacle_on_path = true;
+  }
+  else
+  {
+    m_obstacle_on_path = false;
     std::vector<Eigen::Vector2i> waypoint_pixels =
         m_explorer->sampleWaypointsFromPath(tmp_pixel_path,
                                             m_waypoint_sampling_threshold);
@@ -275,34 +297,6 @@ void HomerNavigationNode::samplePath()
 
     m_last_laser_time = ros::Time::now();
     m_last_pose_time = ros::Time::now();
-    
-}
-
-void HomerNavigationNode::calculatePath()
-{
-  if (!m_explorer)
-  {
-    return;
-  }
-  if (isTargetPositionReached())
-  {
-    return;
-  }
-
-  setExplorerMap();
-  m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
-
-  bool success;
-  std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
-  if (!success)
-  {
-    ROS_WARN_STREAM("no path to target possible - drive to obstacle");
-    m_obstacle_on_path = true;
-  }
-  else
-  {
-    m_obstacle_on_path = false;
-    samplePath();
   }
 }
 

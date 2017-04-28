@@ -115,7 +115,6 @@ private:
    * approximation
    */
   void calculatePath();
-  void samplePath();
 
   void setExplorerMap();
 
