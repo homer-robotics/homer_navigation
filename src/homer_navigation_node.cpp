@@ -226,37 +226,14 @@ void HomerNavigationNode::setExplorerMap()
   }
   if (m_fast_path_planning)
   {
-    // TODO check why not functional
-    // maskMap(temp_map);
+     maskMap(temp_map);
   }
   m_explorer->setOccupancyMap(
       boost::make_shared<nav_msgs::OccupancyGrid>(temp_map));
 }
 
-void HomerNavigationNode::calculatePath()
+void HomerNavigationNode::samplePath()
 {
-  if (!m_explorer)
-  {
-    return;
-  }
-  if (isTargetPositionReached())
-  {
-    return;
-  }
-
-  setExplorerMap();
-  m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
-
-  bool success;
-  std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
-  if (!success)
-  {
-    ROS_WARN_STREAM("no path to target possible - drive to obstacle");
-    m_obstacle_on_path = true;
-  }
-  else
-  {
-    m_obstacle_on_path = false;
     std::vector<Eigen::Vector2i> waypoint_pixels =
         m_explorer->sampleWaypointsFromPath(tmp_pixel_path,
                                             m_waypoint_sampling_threshold);
@@ -298,6 +275,34 @@ void HomerNavigationNode::calculatePath()
 
     m_last_laser_time = ros::Time::now();
     m_last_pose_time = ros::Time::now();
+    
+}
+
+void HomerNavigationNode::calculatePath()
+{
+  if (!m_explorer)
+  {
+    return;
+  }
+  if (isTargetPositionReached())
+  {
+    return;
+  }
+
+  setExplorerMap();
+  m_explorer->setStart(map_tools::toMapCoords(m_robot_pose.position, m_map));
+
+  bool success;
+  std::vector<Eigen::Vector2i> tmp_pixel_path = m_explorer->getPath(success);
+  if (!success)
+  {
+    ROS_WARN_STREAM("no path to target possible - drive to obstacle");
+    m_obstacle_on_path = true;
+  }
+  else
+  {
+    m_obstacle_on_path = false;
+    samplePath();
   }
 }
 
@@ -315,8 +320,17 @@ void HomerNavigationNode::startNavigation()
   ROS_INFO_STREAM("Distance to target still too large ("
                   << m_distance_to_target
                   << "m; requested: " << m_desired_distance << "m)");
-  setExplorerMap();
 
+  if(m_fast_path_planning)
+  {
+      m_fast_path_planning = false;
+      setExplorerMap();
+      m_fast_path_planning = true;
+  }
+  else
+  {
+      setExplorerMap();
+  }
   // check if there still exists a path to the original target
   if (m_avoided_collision && m_initial_path_reaches_target &&
       m_stop_before_obstacle)
@@ -1173,8 +1187,8 @@ void HomerNavigationNode::maskMap(nav_msgs::OccupancyGrid& cmap)
   Eigen::Vector2i pose_pixel =
       map_tools::toMapCoords(m_robot_pose.position, m_map);
   Eigen::Vector2i target_pixel = map_tools::toMapCoords(m_target_point, m_map);
-  Eigen::Vector2i safe_pixel_distance(m_AllowedObstacleDistance.first * 4,
-                                      m_AllowedObstacleDistance.first * 4);
+  Eigen::Vector2i safe_pixel_distance(m_AllowedObstacleDistance.first / m_map->info.resolution * 4,
+                                      m_AllowedObstacleDistance.first / m_map->info.resolution * 4);
   Eigen::AlignedBox2i planning_box;
   planning_box.extend(pose_pixel);
   planning_box.extend(target_pixel);
@@ -1251,7 +1265,7 @@ void HomerNavigationNode::mapCallback(
   initExplorer();
   if (m_state != IDLE)
   {
-    setExplorerMap();
+    //setExplorerMap();
   }
 }
 
@@ -1355,6 +1369,7 @@ void HomerNavigationNode::startNavigationCallback(
 void HomerNavigationNode::moveBaseSimpleGoalCallback(
     const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
+  ros::Time start = ros::Time::now();
   if (msg->header.frame_id != "map")
   {
     tf::StampedTransform transform;
@@ -1420,6 +1435,7 @@ void HomerNavigationNode::moveBaseSimpleGoalCallback(
                   << "\nframe_id: " << msg->header.frame_id);
   initNewTarget();
   startNavigation();
+  ROS_INFO_STREAM("TIME: "<<(ros::Time::now() -start).toSec());
 }
 
 void HomerNavigationNode::navigateToPOICallback(

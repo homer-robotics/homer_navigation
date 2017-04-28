@@ -115,6 +115,7 @@ private:
    * approximation
    */
   void calculatePath();
+  void samplePath();
 
   void setExplorerMap();
 
@@ -177,6 +178,7 @@ private:
    * @return minimal angle needed to turn from angle 1 to angle 2 [-Pi..Pi]
    */
   static float minTurnAngle(float angle1, float angle2);
+
 
   /**
    * converts value from degree to radiant
