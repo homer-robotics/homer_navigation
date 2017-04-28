@@ -389,6 +389,24 @@ void HomerNavigationNode::startNavigation()
   {
     m_explorer->setTarget(new_target_approx);
     m_state = FOLLOWING_PATH;
+
+    //CHECK IF THERE IS A DIRECT PATH TO THE TARGET
+    if(m_fast_path_planning)
+    {
+        m_waypoints.clear(); 
+        
+        geometry_msgs::PoseStamped poseStamped = geometry_msgs::PoseStamped();
+        poseStamped.header.frame_id = "/map";
+        poseStamped.pose.position = m_target_point;
+        poseStamped.pose.orientation.w = 1;
+        m_waypoints.push_back(poseStamped);
+
+        if(!obstacleOnPath())
+        {
+            return;
+        }
+    }
+
     calculatePath();
   }
 }
