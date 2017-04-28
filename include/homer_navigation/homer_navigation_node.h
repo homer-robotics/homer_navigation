@@ -114,7 +114,7 @@ private:
   /** @brief calculate path from current robot position to target
    * approximation
    */
-  void calculatePath();
+  void calculatePath(bool setMap = true);
 
   void setExplorerMap();
 
