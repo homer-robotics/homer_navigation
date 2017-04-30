@@ -1360,7 +1360,7 @@ void HomerNavigationNode::laserDataCallback(
           map_tools::get_max_move_distance(
               map_tools::laser_msg_to_points(msg, m_transform_listener, "/base_"
                                                                         "link"),
-              m_min_x, m_AllowedObstacleDistance.first);
+              m_min_x, m_min_y);
     }
     else
     {
