@@ -28,9 +28,9 @@
 /homer_navigation/max_move_speed:                 0.9  # m/s   max move speed the navigation can send
 ### caution factors values near 0 mean high caution values greater values mean less caution
 ### if any factor equals 0 the robot can't follow paths !!
-/homer_navigation/map_speed_factor:               1.0 # factor for the max speed calculation of the obstacleDistancemap
+/homer_navigation/map_speed_factor:               0.8 # factor for the max speed calculation of the obstacleDistancemap
 /homer_navigation/waypoint_speed_factor:          1.7 # factor for the max speed calculation with the distance to the next Waypoint
-/homer_navigation/obstacle_speed_factor:          0.9  # factor for the max speed calculation with the last laser max movement distance
+/homer_navigation/obstacle_speed_factor:          0.8  # factor for the max speed calculation with the last laser max movement distance
 /homer_navigation/target_distance_speed_factor:   1.3  # factor for the max speed calculation with the distance to target
 
 /homer_navigation/callback_error_duration:        0.3  # s max duration between pose and laser callbacks before error handling is executed
