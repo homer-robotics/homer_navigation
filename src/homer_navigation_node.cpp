@@ -227,7 +227,7 @@ void HomerNavigationNode::setExplorerMap()
   }
   if (m_fast_path_planning)
   {
-    maskMap(temp_map);
+    //maskMap(temp_map);
   }
   m_explorer->setOccupancyMap(
       boost::make_shared<nav_msgs::OccupancyGrid>(temp_map));
