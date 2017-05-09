@@ -1264,6 +1264,18 @@ float HomerNavigationNode::minTurnAngle(float angle1, float angle2)
   return ret;
 }
 
+double HomerNavigationNode::checkOrientation(double angle)
+{
+    if(0 <= angle && angle <= 2 * M_PI )
+    {
+        return angle;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 void HomerNavigationNode::refreshParamsCallback(
     const std_msgs::Empty::ConstPtr& msg)
 {
@@ -1380,7 +1392,7 @@ void HomerNavigationNode::startNavigationCallback(
     const homer_mapnav_msgs::StartNavigation::ConstPtr& msg)
 {
   m_target_point = msg->goal.position;
-  m_target_orientation = tf::getYaw(msg->goal.orientation);
+  m_target_orientation = checkOrientation(tf::getYaw(msg->goal.orientation));
   m_desired_distance =
       msg->distance_to_target < 0.1 ? 0.1 : msg->distance_to_target;
   m_skip_final_turn = msg->skip_final_turn;
@@ -1414,10 +1426,10 @@ void HomerNavigationNode::moveBaseSimpleGoalCallback(
         targetPos = transform * targetPos;
         m_target_point.x = targetPos.getX();
         m_target_point.y = targetPos.getY();
-        m_target_orientation = tf::getYaw(
+        m_target_orientation = checkOrientation(tf::getYaw(
             transform *
             tf::Quaternion(msg->pose.orientation.x, msg->pose.orientation.y,
-                           msg->pose.orientation.z, msg->pose.orientation.w));
+                           msg->pose.orientation.z, msg->pose.orientation.w)));
       }
       catch (tf::TransformException ex)
       {
@@ -1436,10 +1448,10 @@ void HomerNavigationNode::moveBaseSimpleGoalCallback(
         targetPos = transform * targetPos;
         m_target_point.x = targetPos.getX();
         m_target_point.y = targetPos.getY();
-        m_target_orientation = tf::getYaw(
+        m_target_orientation = checkOrientation(tf::getYaw(
             transform *
             tf::Quaternion(msg->pose.orientation.x, msg->pose.orientation.y,
-                           msg->pose.orientation.z, msg->pose.orientation.w));
+                           msg->pose.orientation.z, msg->pose.orientation.w)));
       }
       catch (tf::TransformException ex)
       {
@@ -1451,7 +1463,7 @@ void HomerNavigationNode::moveBaseSimpleGoalCallback(
   else
   {
     m_target_point = msg->pose.position;
-    m_target_orientation = tf::getYaw(msg->pose.orientation);
+    m_target_orientation = checkOrientation(tf::getYaw(msg->pose.orientation));
   }
   m_desired_distance = 0.1;
   m_skip_final_turn = false;
@@ -1479,7 +1491,7 @@ void HomerNavigationNode::navigateToPOICallback(
     if (it->name == msg->poi_name)
     {
       m_target_point = it->pose.position;
-      m_target_orientation = tf::getYaw(it->pose.orientation);
+      m_target_orientation = checkOrientation(tf::getYaw(it->pose.orientation));
       m_desired_distance =
           msg->distance_to_target < 0.1 ? 0.1 : msg->distance_to_target;
       m_skip_final_turn = msg->skip_final_turn;

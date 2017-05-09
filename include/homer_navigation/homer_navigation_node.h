@@ -178,6 +178,8 @@ private:
    */
   static float minTurnAngle(float angle1, float angle2);
 
+  static double checkOrientation(double angle);
+
 
   /**
    * converts value from degree to radiant
