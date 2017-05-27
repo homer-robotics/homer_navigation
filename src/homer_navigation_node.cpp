@@ -1266,14 +1266,14 @@ float HomerNavigationNode::minTurnAngle(float angle1, float angle2)
 
 double HomerNavigationNode::checkOrientation(double angle)
 {
-    if(0 <= angle && angle <= 2 * M_PI )
-    {
+    //if(0 <= angle && angle <= 2 * M_PI )
+    //{
         return angle;
-    }
-    else
-    {
-        return 0;
-    }
+    //}
+    //else
+    //{
+        //return 0;
+    //}
 }
 
 void HomerNavigationNode::refreshParamsCallback(
