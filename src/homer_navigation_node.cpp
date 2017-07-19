@@ -101,6 +101,7 @@ void HomerNavigationNode::loadParameters()
                     (float)0.4);
   ros::param::param("/homer_navigation/max_drive_angle", m_max_drive_angle,
                     (float)0.6);
+  ros::param::param("/homer_navigation/speed_ramp", m_speed_ramp, (float) 0.1);
 
   // caution factors
   ros::param::param("/homer_navigation/map_speed_factor", m_map_speed_factor,
@@ -686,7 +687,7 @@ bool HomerNavigationNode::checkWaypoints()
                     wp_0_to_wp_1[1];  // dot product of point_to_start * line
 
     // check if current waypoint has been reached
-    bool waypoint_reached = (dot >= 0 || distanceToWaypoint < waypointRadius);
+    bool waypoint_reached = (dot >= 0 && distanceToWaypoint < 2 * waypointRadius || distanceToWaypoint < waypointRadius);
     if (waypoint_reached && m_waypoints.size() > 1)
     {
       m_waypoints.erase(m_waypoints.begin());
@@ -794,7 +795,7 @@ bool HomerNavigationNode::updateSpeeds()
     }
     else
     {
-      m_cmd_vel.linear.x += std::min(new_speed - m_cmd_vel.linear.x, 0.3);
+      m_cmd_vel.linear.x += std::min((float)(new_speed - m_cmd_vel.linear.x), m_speed_ramp);
     }
   }
 

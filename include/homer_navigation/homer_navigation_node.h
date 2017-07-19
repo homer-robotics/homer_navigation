@@ -311,6 +311,7 @@ private:
   float m_max_move_speed;
   float m_max_drive_angle;
   float m_waypoint_radius_factor;
+  float m_speed_ramp;
 
   float m_distance_to_target;
   float m_angular_avoidance;
