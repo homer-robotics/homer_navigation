@@ -11,27 +11,33 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   
-  <build_depend>roscpp</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>homer_nav_libs</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>homer_mapnav_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>tf</build_depend>
+  <build_depend>actionlib</build_depend>
   <build_depend>cmake_modules</build_depend>
   <build_depend>eigen</build_depend>
+  <build_depend>homer_mapnav_msgs</build_depend>
+  <build_depend>homer_nav_libs</build_depend>
   <build_depend>homer_ptu_msgs</build_depend>
+  <build_depend>homer_robbie_architecture</build_depend>
+  <build_depend>homer_tts</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf</build_depend>
   
+  <run_depend>actionlib</run_depend>
+  <run_depend>eigen</run_depend>
+  <run_depend>homer_mapnav_msgs</run_depend>
+  <run_depend>homer_nav_libs</run_depend>
+  <run_depend>homer_ptu_msgs</run_depend>
+  <run_depend>homer_robbie_architecture</run_depend>
+  <run_depend>homer_tts</run_depend>
+  <run_depend>nav_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>roslib</run_depend>
-  <run_depend>homer_nav_libs</run_depend>
-  <run_depend>nav_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
-  <run_depend>homer_mapnav_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
-  <run_depend>eigen</run_depend>
-  <run_depend>homer_ptu_msgs</run_depend>
 
 </package>

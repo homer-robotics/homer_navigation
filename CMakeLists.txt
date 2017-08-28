@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   cmake_modules
   homer_ptu_msgs
+  actionlib
+  homer_robbie_architecture
+  homer_tts
 )
 
 find_package(Eigen3 REQUIRED)
@@ -49,14 +52,23 @@ target_link_libraries(homer_navigation
    ${EIGEN3_LIBRARIES}
  )
 
+add_executable(drive_to src/drive_to_node.cpp)
+add_dependencies(drive_to ${catkin_EXPORTED_TARGETS})
+target_link_libraries(drive_to ${catkin_LIBRARIES})
+
 install(DIRECTORY include/${PROJECT_NAME}/
 	DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(TARGETS homer_navigation
+install(TARGETS homer_navigation drive_to
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(PROGRAMS
+	nodes/detect_obstacle.py
+	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch/
