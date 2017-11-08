@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'master' of gitlab.uni-koblenz.de:robbie/homer_mapping
+* Contributors: Raphael Memmesheimer
+
 0.1.21 (2017-03-21)
 -------------------
 * autoformat
