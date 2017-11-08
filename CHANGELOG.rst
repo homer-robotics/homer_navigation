@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.37 (2017-11-08)
+-------------------
 * Merge branch 'master' of gitlab.uni-koblenz.de:robbie/homer_mapping
 * Contributors: Raphael Memmesheimer
 
