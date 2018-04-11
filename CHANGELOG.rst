@@ -2,8 +2,8 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.41 (2018-04-11)
+-------------------
 * tarjectory msgs
 * Contributors: Raphael Memmesheimer
 
