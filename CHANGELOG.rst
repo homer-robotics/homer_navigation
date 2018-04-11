@@ -2,6 +2,11 @@
 Changelog for package homer_navigation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* drive to torso position
+* Contributors: Raphael Memmesheimer
+
 0.1.39 (2017-11-14)
 -------------------
 
