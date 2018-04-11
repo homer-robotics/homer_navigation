@@ -22,12 +22,12 @@
 // Other
 namespace states
 {
-enum State
-{
-  IDLE,
-  DRIVING_TO_GOAL_LOCATION,
-  FINISHED
-};
+	enum State
+	{
+		IDLE,
+		DRIVING_TO_GOAL_LOCATION,
+		FINISHED
+	};
 }
 typedef states::State State;
 
@@ -36,45 +36,49 @@ typedef actionlib::SimpleActionClient<homer_mapnav_msgs::DetectObstacleAction> D
 
 class DriveTo
 {
-protected:
-  Server m_as_;
+	protected:
+		Server m_as_;
 
-  std::string m_action_name_;
-  std::unique_ptr<DetectObstacleActionClient> m_obstacle_client_;
+		std::string m_action_name_;
+		std::unique_ptr<DetectObstacleActionClient> m_obstacle_client_;
 
-public:
-  DriveTo(ros::NodeHandle n, std::string name);
-  ~DriveTo();
-  void init();
+	public:
+		DriveTo(ros::NodeHandle n, std::string name);
+		~DriveTo();
+		void init();
 
-  void targetReachedCallback(const std_msgs::String::ConstPtr& p);
-  void targetUnreachableCallback(const homer_mapnav_msgs::TargetUnreachable::ConstPtr& msg);
+		void targetReachedCallback(const std_msgs::String::ConstPtr& p);
+		void targetUnreachableCallback(const homer_mapnav_msgs::TargetUnreachable::ConstPtr& msg);
 
-private:
-  int check_obstacle_type(const geometry_msgs::PointStamped& point);
-  // Member Variables
-  ros::NodeHandle m_nh_;
-  homer_mapnav_msgs::DriveToGoal::ConstPtr m_goal;
+	private:
+		int check_obstacle_type(const geometry_msgs::PointStamped& point);
+		// Member Variables
+		ros::NodeHandle m_nh_;
+		homer_mapnav_msgs::DriveToGoal::ConstPtr m_goal;
 
-  void driveToCallback();
-  void switchMapLayers(bool state);
+		void driveToCallback();
+		void switchMapLayers(bool state);
 
-  void publishFeedback(float progress, std::string feedback);
+		void publishFeedback(float progress, std::string feedback);
 
-  void speakBlocked(std::string text);
+		void speakBlocked(std::string text);
 
-  bool m_speaking;
-  bool m_check_obstacle;
+		void setTorsoPosition(float position);
 
-  StateMachine<State> m_statemachine;
-  ros::Subscriber m_target_unreachable_sub_;
-  ros::Subscriber m_target_reached_sub_;
+		ros::Publisher m_set_torso_pub_;
 
-  ros::Publisher m_map_layer_pub_;
-  ros::Publisher m_navigate_to_poi_pub_;
+		bool m_speaking;
+		bool m_check_obstacle;
 
-  // Node Handle
-  ros::NodeHandle nh;
+		StateMachine<State> m_statemachine;
+		ros::Subscriber m_target_unreachable_sub_;
+		ros::Subscriber m_target_reached_sub_;
+
+		ros::Publisher m_map_layer_pub_;
+		ros::Publisher m_navigate_to_poi_pub_;
+
+		// Node Handle
+		ros::NodeHandle nh;
 };
 
 #endif /* end of include guard: DRIVE_TO_NODE_H_U58RL9V7 */
