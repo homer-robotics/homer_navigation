@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   homer_ptu_msgs
   actionlib
   homer_robbie_architecture
+  trajectory_msgs
   homer_tts
 )
 
@@ -35,6 +36,7 @@ catkin_package(
 	sensor_msgs
 	homer_mapnav_msgs
 	homer_nav_libs
+  	trajectory_msgs
 	tf
 )
 
