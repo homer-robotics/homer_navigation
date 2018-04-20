@@ -39,8 +39,10 @@ HomerNavigationNode::HomerNavigationNode()
       "/homer_navigation/ignore_laser", 3,
       &HomerNavigationNode::ignoreLaserCallback, this);
 
+  std::string cmd_vel_topic;
+  nh.param<std::string>("/homer_cmd_vel_topic", cmd_vel_topic, "/robot_platform/cmd_vel");
   m_cmd_vel_pub =
-      nh.advertise<geometry_msgs::Twist>("/robot_platform/cmd_vel", 3);
+      nh.advertise<geometry_msgs::Twist>(cmd_vel_topic, 3);
   m_target_reached_string_pub =
       nh.advertise<std_msgs::String>("/homer_navigation/target_reached", 3);
   // m_target_reached_empty_pub 	=
