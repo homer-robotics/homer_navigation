@@ -1,6 +1,6 @@
 <launch>
  <rosparam command="load" file="$(find homer_navigation)/config/homer_navigation.yaml"/>
- <node ns="/homer_navigation" name="homer_navigation" pkg="homer_navigation" type="homer_navigation" output="screen"/> 
+ <node ns="/homer_navigation" name="homer_navigation" pkg="homer_navigation" type="homer_navigation" output="screen" respawn="true"/> 
  <node name="drive_to" pkg="homer_navigation" type="drive_to" />
  <node name="detect_obstacle" pkg="homer_navigation" type="detect_obstacle.py"/>
 </launch>
