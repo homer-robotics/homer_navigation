@@ -1330,7 +1330,7 @@ void HomerNavigationNode::calcMaxMoveDist()
   std::string laser = "";
   for (auto d : m_max_move_distances)
   {
-    if ((ros::Time::now() - m_scan_map[d.first]->header.stamp) <
+    if (d.first == "depth" || (ros::Time::now() - m_scan_map[d.first]->header.stamp) <
         ros::Duration(1))
     {
       m_max_move_distance = std::min(m_max_move_distance, d.second);
