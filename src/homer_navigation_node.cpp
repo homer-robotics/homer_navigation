@@ -830,6 +830,9 @@ bool HomerNavigationNode::checkForObstacles()
   {
     if (obstacleOnPath())
     {
+        if(m_stop_before_obstacle)
+            sendTargetUnreachableMsg(30);
+
       if (m_seen_obstacle_before)
       {
         float distanceToObstacle =
