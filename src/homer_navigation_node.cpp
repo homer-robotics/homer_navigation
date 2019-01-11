@@ -830,8 +830,9 @@ bool HomerNavigationNode::checkForObstacles()
   {
     if (obstacleOnPath())
     {
-        if(m_stop_before_obstacle)
-            sendTargetUnreachableMsg(homer_mapnav_msgs::TargetUnreachable::LASER_OBSTACLE);
+      //Message stops the robot and triggers the targetUnreachableCallback of the drive_to_node.
+      if(m_stop_before_obstacle)
+        sendTargetUnreachableMsg(homer_mapnav_msgs::TargetUnreachable::LASER_OBSTACLE);
 
       if (m_seen_obstacle_before)
       {
