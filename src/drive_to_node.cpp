@@ -209,11 +209,15 @@ DriveTo::DriveTo(ros::NodeHandle n, std::string name)
 void DriveTo::speakBlocked(std::string text)
 {
 	SpeakActionClient client("speak");
-	client.waitForServer();
+	bool wait_successful = client.waitForServer(ros::Duration(30.0));
+	if( !wait_successful )
+		ROS_ERROR_STREAM("drive_to: speakBlocked: waitForServer TIMEOUT");
 	homer_tts::SpeakGoal goal;
 	goal.text = text;
 	client.sendGoal(goal);
-	client.waitForResult();
+	bool finished_before_timeout = client.waitForResult(ros::Duration(30.0));
+	if( !finished_before_timeout )
+		ROS_ERROR_STREAM("drive_to: speakBlocked: waitForResult TIMEOUT");
 }
 
 DriveTo::~DriveTo()
