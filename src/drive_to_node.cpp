@@ -1,5 +1,4 @@
 #include <homer_navigation/drive_to_node.h>
-
 #include <homer_mapnav_msgs/MapLayers.h>
 #include <homer_mapnav_msgs/NavigateToPOI.h>
 #include <actionlib/client/simple_action_client.h>
@@ -52,7 +51,7 @@ void DriveTo::publishFeedback(float progress, std::string feedback)
 void DriveTo::targetUnreachableCallback(
 		const homer_mapnav_msgs::TargetUnreachable::ConstPtr& msg)
 {
-	if (m_statemachine.state() == states::DRIVING_TO_GOAL_LOCATION)
+	if (m_statemachine.state() == states::DRIVING_TO_POI)
 	{
 		homer_mapnav_msgs::DriveToResult result;
 		result.result = homer_mapnav_msgs::DriveToResult::FAILED_TARGET_UNREACHABLE;
@@ -69,6 +68,13 @@ void DriveTo::targetUnreachableCallback(
 
 		m_as_.setAborted(result);
 		m_statemachine.setState(states::IDLE);
+	}
+	else if (m_statemachine.state() == states::DRIVING_TO_POINT)
+	{
+		m_statemachine.setState(states::IDLE);
+
+		move_base_msgs::MoveBaseResult result;
+		m_mbas_.setAborted(result);
 	}
 }
 
@@ -90,13 +96,13 @@ int DriveTo::check_obstacle_type(const geometry_msgs::PointStamped& point)
 void DriveTo::targetReachedCallback(const std_msgs::String::ConstPtr& p)
 {
 	(void)p;  // ignore unused input message
-	if (m_statemachine.state() == states::DRIVING_TO_GOAL_LOCATION)
+	if (m_statemachine.state() == states::DRIVING_TO_POI)
 	{
 		publishFeedback(homer_mapnav_msgs::DriveToFeedback::DRIVING_TO_GOAL_LOCATION,
 				"Reached goal location");
 		ROS_INFO_STREAM("Reached the goal location");
 
-		m_statemachine.setState(states::FINISHED);
+		m_statemachine.setState(states::IDLE);
 
 		if (!m_goal->suppress_speaking)
 		{
@@ -106,6 +112,15 @@ void DriveTo::targetReachedCallback(const std_msgs::String::ConstPtr& p)
 		homer_mapnav_msgs::DriveToResult result;
 		result.result = homer_mapnav_msgs::DriveToResult::SUCCEEDED;
 		m_as_.setSucceeded(result);
+	}
+	else if (m_statemachine.state() == states::DRIVING_TO_POINT)
+	{
+		ROS_INFO_STREAM("Reached the goal location");
+
+		m_statemachine.setState(states::IDLE);
+
+		move_base_msgs::MoveBaseResult result;
+		m_mbas_.setSucceeded(result);
 	}
 }
 
@@ -124,7 +139,10 @@ void DriveTo::switchMapLayers(bool state)
 
 void DriveTo::driveToCallback()
 {
+	if (m_statemachine.state() != states::IDLE)
+		return;
 	m_goal = m_as_.acceptNewGoal();
+	m_statemachine.setState(states::DRIVING_TO_POI);
 	m_check_obstacle = m_goal->check_obstacle;
 	if (m_goal->plan_only_on_slam_map)
 	{
@@ -169,19 +187,56 @@ void DriveTo::driveToCallback()
 		ROS_INFO_STREAM("Reenabling map layers");
 		switchMapLayers(true);
 	}
-	m_statemachine.setState(states::DRIVING_TO_GOAL_LOCATION);
 	publishFeedback(homer_mapnav_msgs::DriveToFeedback::DRIVING_TO_GOAL_LOCATION,
 			"Action goal received");
 }
 
-DriveTo::DriveTo(ros::NodeHandle n, std::string name)
-	: m_as_(n, "drive_to", false), m_action_name_(name)
+void DriveTo::moveBaseCallback()
+{
+	if (m_statemachine.state() != states::IDLE)
+		return;
+	m_mbgoal = m_mbas_.acceptNewGoal();
+	m_statemachine.setState(states::DRIVING_TO_POINT);
+	m_transform_listener.waitForTransform("/map", m_mbgoal->target_pose.header.frame_id, m_mbgoal->target_pose.header.stamp, ros::Duration(1));
+	homer_mapnav_msgs::StartNavigation msg;
+	geometry_msgs::PoseStamped pout;
+	m_transform_listener.transformPose("/map", m_mbgoal->target_pose, pout);
+	msg.goal = pout.pose;
+	msg.skip_final_turn = false;
+	msg.fast_planning = false;
+	m_start_navigation_pub_.publish(msg);
+
+
+	std::string arm = "kinova";
+	ros::param::get("arm", arm);
+	if (arm == "tiago")
+	{
+		ROS_INFO_STREAM("[DRIVE_TO] Arm is TIAGO, setting torso position");
+		float torso_height = 0.15;
+		setTorsoPosition(torso_height);
+	}
+}
+
+void DriveTo::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+	if (m_statemachine.state() == states::DRIVING_TO_POINT)
+	{
+		move_base_msgs::MoveBaseFeedback feedback;
+		feedback.base_position = *msg;
+		m_mbas_.publishFeedback(feedback);
+	}
+}
+
+DriveTo::DriveTo(ros::NodeHandle n)
+	: m_as_(n, "drive_to", false), m_mbas_(n, "move_base", false)
 {
 	this->init();
 	m_nh_ = n;
 
 	m_as_.registerGoalCallback(boost::bind(&DriveTo::driveToCallback, this));
+	m_mbas_.registerGoalCallback(boost::bind(&DriveTo::moveBaseCallback, this));
 	m_as_.start();
+	m_mbas_.start();
 
 	m_obstacle_client_.reset(new DetectObstacleActionClient("detect_obstacle"));
 
@@ -200,6 +255,7 @@ DriveTo::DriveTo(ros::NodeHandle n, std::string name)
 	m_map_layer_pub_ = m_nh_.advertise<homer_mapnav_msgs::MapLayers>(
 			"/map_manager/toggle_map_visibility", 20);
 	m_navigate_to_poi_pub_ = m_nh_.advertise<homer_mapnav_msgs::NavigateToPOI>("/homer_navigation/navigate_to_POI", 1);
+	m_start_navigation_pub_ = m_nh_.advertise<homer_mapnav_msgs::StartNavigation>("/homer_navigation/start_navigation", 1);
 
 	m_set_torso_pub_ = m_nh_.advertise<trajectory_msgs::JointTrajectory>("/torso_controller/command",1);
 
@@ -227,8 +283,8 @@ DriveTo::~DriveTo()
 void DriveTo::init()
 {
 	ADD_MACHINE_STATE(m_statemachine, states::IDLE);
-	ADD_MACHINE_STATE(m_statemachine, states::FINISHED);
-	ADD_MACHINE_STATE(m_statemachine, states::DRIVING_TO_GOAL_LOCATION);
+	ADD_MACHINE_STATE(m_statemachine, states::DRIVING_TO_POI);
+	ADD_MACHINE_STATE(m_statemachine, states::DRIVING_TO_POINT);
 
 	m_statemachine.setName("DriveTo Action State");
 	m_statemachine.setState(states::IDLE);
@@ -238,7 +294,7 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "drive_to_node");
 	ros::NodeHandle n;
-	DriveTo drive_to_node(n, ros::this_node::getName());
+	DriveTo drive_to_node(n);
 	ros::spin();
 	return 0;
 }
