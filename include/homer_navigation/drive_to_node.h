@@ -6,16 +6,21 @@
 #include <ros/ros.h>
 
 #include <homer_mapnav_msgs/TargetUnreachable.h>
+#include <homer_mapnav_msgs/StartNavigation.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <homer_mapnav_msgs/DriveToAction.h>
 #include <homer_mapnav_msgs/DetectObstacleAction.h>
+
+#include <move_base_msgs/MoveBaseAction.h>
 
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 
 #include <homer_robbie_architecture/Architecture/StateMachine/StateMachine.h>
+#include <tf/transform_listener.h>
 
 // Messages published
 
@@ -25,25 +30,26 @@ namespace states
 	enum State
 	{
 		IDLE,
-		DRIVING_TO_GOAL_LOCATION,
-		FINISHED
+		DRIVING_TO_POI,
+		DRIVING_TO_POINT
 	};
 }
 typedef states::State State;
 
 typedef actionlib::SimpleActionServer<homer_mapnav_msgs::DriveToAction> Server;
+typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseServer;
 typedef actionlib::SimpleActionClient<homer_mapnav_msgs::DetectObstacleAction> DetectObstacleActionClient;
 
 class DriveTo
 {
 	protected:
 		Server m_as_;
+		MoveBaseServer m_mbas_;
 
-		std::string m_action_name_;
 		std::unique_ptr<DetectObstacleActionClient> m_obstacle_client_;
 
 	public:
-		DriveTo(ros::NodeHandle n, std::string name);
+		DriveTo(ros::NodeHandle n);
 		~DriveTo();
 		void init();
 
@@ -55,8 +61,11 @@ class DriveTo
 		// Member Variables
 		ros::NodeHandle m_nh_;
 		homer_mapnav_msgs::DriveToGoal::ConstPtr m_goal;
+		move_base_msgs::MoveBaseGoal::ConstPtr m_mbgoal;
 
 		void driveToCallback();
+		void moveBaseCallback();
+		void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 		void switchMapLayers(bool state);
 
 		void publishFeedback(float progress, std::string feedback);
@@ -73,9 +82,13 @@ class DriveTo
 		StateMachine<State> m_statemachine;
 		ros::Subscriber m_target_unreachable_sub_;
 		ros::Subscriber m_target_reached_sub_;
+		ros::Subscriber m_pose_sub_;
 
 		ros::Publisher m_map_layer_pub_;
 		ros::Publisher m_navigate_to_poi_pub_;
+		ros::Publisher m_start_navigation_pub_;
+
+		tf::TransformListener m_transform_listener;
 
 		// Node Handle
 		ros::NodeHandle nh;
