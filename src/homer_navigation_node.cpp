@@ -711,7 +711,7 @@ bool HomerNavigationNode::checkWaypoints()
 
   if (m_use_ptu)
   {
-    ROS_INFO_STREAM("Moving PTU to center next Waypoint");
+    ROS_DEBUG_STREAM("Moving PTU to center next Waypoint");
     homer_ptu_msgs::CenterWorldPoint ptu_msg;
     ptu_msg.point.x = m_waypoints[0].pose.position.x;
     ptu_msg.point.y = m_waypoints[0].pose.position.y;
