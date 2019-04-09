@@ -10,6 +10,7 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
     m_nh = nh;
     m_DoMappingSubscriber = nh->subscribe("/depth_mapping/do_mapping", 1, &depth_occupancy_map::doMappingCallback, this);
     m_MapSubscriber = nh->subscribe("/map", 1, &depth_occupancy_map::map_callback, this);
+    m_ScanSubscriber = nh->subscribe("/scan", 1, &depth_occupancy_map::scan_callback, this);
     m_StartNavigationSubscriber = nh->subscribe("/homer_navigation/start_navigation", 3, &depth_occupancy_map::startNavigationCallback, this);
     m_MoveBaseSimpleGoalSubscriber = nh->subscribe("/move_base_simple/goal", 3, &depth_occupancy_map::moveBaseSimpleGoalCallback, this);
     m_StopNavigationSubscriber = nh->subscribe("/homer_navigation/stop_navigation", 3, &depth_occupancy_map::stopNavigationCallback, this);
@@ -36,7 +37,6 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
     m_do_mapping = true;
     m_navigating = false;
     loadConfigValue("/rgbd_node/points_topic", m_depth_topic);
-    loadConfigValue("/depth_occupancy_map/laser_frame", m_laser_frame);
 
     m_timer.start();
 }
@@ -58,6 +58,13 @@ void depth_occupancy_map::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& 
     m_got_map_size = true;
     m_MapSubscriber.shutdown();
 
+}
+
+void depth_occupancy_map::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
+{
+    ROS_INFO_STREAM("got /scan");
+    m_laser_frame = msg->header.frame_id;
+    m_ScanSubscriber.shutdown();
 }
 
 void depth_occupancy_map::timerCallback(const ros::TimerEvent&)

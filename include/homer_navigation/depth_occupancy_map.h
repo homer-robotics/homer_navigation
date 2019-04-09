@@ -15,6 +15,7 @@
 #include <homer_mapnav_msgs/TargetUnreachable.h>
 #include <std_msgs/String.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
@@ -39,6 +40,7 @@ class depth_occupancy_map
         private:
                 void depth_callback(const sensor_msgs::PointCloud2::ConstPtr& msg);
                 void map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+                void scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
                 void doMappingCallback(const std_msgs::Bool::ConstPtr& msg);
                 void timerCallback(const ros::TimerEvent&);
                 void startNavigationCallback(const homer_mapnav_msgs::StartNavigation::ConstPtr& msg);
@@ -57,6 +59,7 @@ class depth_occupancy_map
 
                 ros::Subscriber m_DoMappingSubscriber;
                 ros::Subscriber m_MapSubscriber;
+                ros::Subscriber m_ScanSubscriber;
                 ros::Subscriber m_StartNavigationSubscriber;
                 ros::Subscriber m_MoveBaseSimpleGoalSubscriber;
                 ros::Subscriber m_StopNavigationSubscriber;
