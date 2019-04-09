@@ -149,7 +149,7 @@ void depth_occupancy_map::updateDepthData(const sensor_msgs::PointCloud2::ConstP
                 {
                     point.x = cloud.points[i].x;
                     point.y = cloud.points[i].y;
-                    const float distance = (point.x - laser.x) * (point.x - laser.x) + (point.y - laser.y) * (point.y - laser.y);
+                    const float distance = (point.x - robot.x) * (point.x - robot.x) + (point.y - robot.y) * (point.y - robot.y);
                     if (distance < max_distance && distance > min_distance)
                     {
                         auto sensor_map_point = map_tools::toMapCoords(point, m_map.info.origin, m_map.info.resolution);
