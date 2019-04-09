@@ -23,7 +23,7 @@ namespace
 
 void DriveTo::setTorsoPosition(float position)
 {
-	ROS_INFO_STREAM("Setting torso position to "<< position);
+	ROS_INFO_STREAM("[driveto] Setting torso position to "<< position);
 
 	float time_to_lift = 1.0;
 	trajectory_msgs::JointTrajectory msg;
@@ -42,6 +42,7 @@ void DriveTo::setTorsoPosition(float position)
 
 void DriveTo::publishFeedback(float progress, std::string feedback)
 {
+	ROS_INFO_STREAM("[driveto] publishFeedback: " << feedback);
 	homer_mapnav_msgs::DriveToFeedback drive_to_feedback;
 	drive_to_feedback.progress = progress / homer_mapnav_msgs::DriveToFeedback::STEPS;
 	drive_to_feedback.feedback = feedback;
@@ -53,6 +54,7 @@ void DriveTo::targetUnreachableCallback(
 {
 	if (m_statemachine.state() == states::DRIVING_TO_POI)
 	{
+        ROS_INFO_STREAM("[driveto] got TargetUnreachable");
 		homer_mapnav_msgs::DriveToResult result;
 		result.result = homer_mapnav_msgs::DriveToResult::FAILED_TARGET_UNREACHABLE;
 		if (!m_goal->suppress_speaking)
@@ -71,6 +73,7 @@ void DriveTo::targetUnreachableCallback(
 	}
 	else if (m_statemachine.state() == states::DRIVING_TO_POINT)
 	{
+        ROS_INFO_STREAM("[driveto] got TargetUnreachable");
 		m_statemachine.setState(states::IDLE);
 
 		move_base_msgs::MoveBaseResult result;
@@ -80,7 +83,7 @@ void DriveTo::targetUnreachableCallback(
 
 int DriveTo::check_obstacle_type(const geometry_msgs::PointStamped& point)
 {
-	ROS_INFO_STREAM("Checking for obstacles");
+	ROS_INFO_STREAM("[driveto] Checking for obstacles");
 	homer_mapnav_msgs::DetectObstacleGoal obstacle_goal;
 	obstacle_goal.location = point;
 	m_obstacle_client_->waitForServer();
@@ -88,7 +91,7 @@ int DriveTo::check_obstacle_type(const geometry_msgs::PointStamped& point)
 	m_obstacle_client_->waitForResult(ros::Duration(2.0));
 
 	auto obstacle_result = m_obstacle_client_->getResult();
-	ROS_INFO_STREAM("Obstacle type: " << obstacle_result->result);
+	ROS_INFO_STREAM("[driveto] Obstacle type: " << obstacle_result->result);
 
 	return detectToDriveTypes[obstacle_result->result];
 }
@@ -100,7 +103,7 @@ void DriveTo::targetReachedCallback(const std_msgs::String::ConstPtr& p)
 	{
 		publishFeedback(homer_mapnav_msgs::DriveToFeedback::DRIVING_TO_GOAL_LOCATION,
 				"Reached goal location");
-		ROS_INFO_STREAM("Reached the goal location");
+		ROS_INFO_STREAM("[driveto] Reached the goal location");
 
 		m_statemachine.setState(states::IDLE);
 
@@ -115,7 +118,7 @@ void DriveTo::targetReachedCallback(const std_msgs::String::ConstPtr& p)
 	}
 	else if (m_statemachine.state() == states::DRIVING_TO_POINT)
 	{
-		ROS_INFO_STREAM("Reached the goal location");
+		ROS_INFO_STREAM("[driveto] Reached the goal location");
 
 		m_statemachine.setState(states::IDLE);
 
@@ -126,6 +129,7 @@ void DriveTo::targetReachedCallback(const std_msgs::String::ConstPtr& p)
 
 void DriveTo::switchMapLayers(bool state)
 {
+    ROS_INFO_STREAM("[driveto] switchMapLayers: "<< state);
 	homer_mapnav_msgs::MapLayers msg;
 	msg.state = state;
 	for (int layer = homer_mapnav_msgs::MapLayers::MASKING_LAYER;
@@ -139,14 +143,18 @@ void DriveTo::switchMapLayers(bool state)
 
 void DriveTo::driveToCallback()
 {
+    ROS_INFO_STREAM("[driveto] driveToCallback");
 	if (m_statemachine.state() != states::IDLE)
+    {
+        ROS_INFO_STREAM("[driveto] not in state IDLE. ignoring driveTo request");
 		return;
+    }
 	m_goal = m_as_.acceptNewGoal();
 	m_statemachine.setState(states::DRIVING_TO_POI);
 	m_check_obstacle = m_goal->check_obstacle;
 	if (m_goal->plan_only_on_slam_map)
 	{
-		ROS_INFO_STREAM("Disabling map layers "
+		ROS_INFO_STREAM("[driveto] Disabling map layers "
 				<< homer_mapnav_msgs::MapLayers::MASKING_LAYER << " to "
 				<< homer_mapnav_msgs::MapLayers::RAPID_MAP
 				<< " for path planning");
@@ -175,7 +183,7 @@ void DriveTo::driveToCallback()
     ros::param::get("arm", arm);
 	if (arm == "tiago")
 	{
-		ROS_INFO_STREAM("[DRIVE_TO] Arm is TIAGO, setting torso position");
+		ROS_INFO_STREAM("[driveto] Arm is TIAGO, setting torso position");
 		float torso_height = 0.15;
 		ros::param::get("/torso_height/"+m_goal->goal_location, torso_height);
 		setTorsoPosition(torso_height);
@@ -184,17 +192,22 @@ void DriveTo::driveToCallback()
 	if (m_goal->plan_only_on_slam_map)
 	{
 		ros::Duration(2).sleep();
-		ROS_INFO_STREAM("Reenabling map layers");
+		ROS_INFO_STREAM("[driveto] Reenabling map layers");
 		switchMapLayers(true);
 	}
 	publishFeedback(homer_mapnav_msgs::DriveToFeedback::DRIVING_TO_GOAL_LOCATION,
 			"Action goal received");
+    ROS_INFO_STREAM("[driveto] driveToCallback finished");
 }
 
 void DriveTo::moveBaseCallback()
 {
+    ROS_INFO_STREAM("[driveto] moveBaseCallback");
 	if (m_statemachine.state() != states::IDLE)
+    {
+        ROS_INFO_STREAM("[driveto] not in state IDLE. ignoring moveBase request");
 		return;
+    }
 	m_mbgoal = m_mbas_.acceptNewGoal();
 	m_statemachine.setState(states::DRIVING_TO_POINT);
 	m_transform_listener.waitForTransform("/map", m_mbgoal->target_pose.header.frame_id, m_mbgoal->target_pose.header.stamp, ros::Duration(1));
@@ -211,10 +224,11 @@ void DriveTo::moveBaseCallback()
 	ros::param::get("arm", arm);
 	if (arm == "tiago")
 	{
-		ROS_INFO_STREAM("[DRIVE_TO] Arm is TIAGO, setting torso position");
+		ROS_INFO_STREAM("[driveto] Arm is TIAGO, setting torso position");
 		float torso_height = 0.15;
 		setTorsoPosition(torso_height);
 	}
+    ROS_INFO_STREAM("[driveto] moveBaseCallback finished");
 }
 
 void DriveTo::poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
@@ -259,21 +273,23 @@ DriveTo::DriveTo(ros::NodeHandle n)
 
 	m_set_torso_pub_ = m_nh_.advertise<trajectory_msgs::JointTrajectory>("/torso_controller/command",1);
 
-	ROS_INFO_STREAM("DriveTo Action Node initialized");
+	ROS_INFO_STREAM("[driveto] Action Node initialized");
 }
 
 void DriveTo::speakBlocked(std::string text)
 {
+    ROS_INFO_STREAM("[driveto] speakBlocked");
 	SpeakActionClient client("speak");
 	bool wait_successful = client.waitForServer(ros::Duration(30.0));
 	if( !wait_successful )
-		ROS_ERROR_STREAM("drive_to: speakBlocked: waitForServer TIMEOUT");
+		ROS_ERROR_STREAM("[driveto] speakBlocked: waitForServer TIMEOUT");
 	homer_tts::SpeakGoal goal;
 	goal.text = text;
 	client.sendGoal(goal);
 	bool finished_before_timeout = client.waitForResult(ros::Duration(30.0));
 	if( !finished_before_timeout )
-		ROS_ERROR_STREAM("drive_to: speakBlocked: waitForResult TIMEOUT");
+		ROS_ERROR_STREAM("[driveto] speakBlocked: waitForResult TIMEOUT");
+    ROS_INFO_STREAM("[driveto] speakBlocked finished");
 }
 
 DriveTo::~DriveTo()

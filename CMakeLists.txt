@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   homer_robbie_architecture
   trajectory_msgs
   homer_tts
+  homer_tools
 )
 
 find_package(Eigen3 REQUIRED)
@@ -57,6 +58,10 @@ target_link_libraries(homer_navigation
 add_executable(drive_to src/drive_to_node.cpp)
 add_dependencies(drive_to ${catkin_EXPORTED_TARGETS})
 target_link_libraries(drive_to ${catkin_LIBRARIES})
+
+add_executable(depth_occupancy_map src/depth_occupancy_map.cpp)
+add_dependencies(depth_occupancy_map ${catkin_EXPORTED_TARGETS})
+target_link_libraries(depth_occupancy_map ${catkin_LIBRARIES})
 
 install(DIRECTORY include/${PROJECT_NAME}/
 	DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
