@@ -30,7 +30,6 @@
 
 #include <homer_nav_libs/tools.h>
 #include <homer_tools/coordinate_converstion.h>
-#include <homer_tools/loadRosConfig.h>
 
 class depth_occupancy_map
 {

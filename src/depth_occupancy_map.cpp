@@ -2,8 +2,6 @@
 #include <map>
 #include <math.h>
 
-#include <homer_tools/loadRosConfig.h>
-
 depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
     MAX_DISTANCE(4.0)
 {
@@ -36,7 +34,8 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
 
     m_do_mapping = true;
     m_navigating = false;
-    loadConfigValue("/rgbd_node/points_topic", m_depth_topic);
+    m_nh->getParam("/rgbd_node/points_topic", m_depth_topic);
+    ROS_INFO_STREAM("[depth_occupancy_map] points topic: " << m_depth_topic);
 
     m_timer.start();
 }
@@ -44,7 +43,7 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
 void depth_occupancy_map::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
 {
 
-    ROS_INFO_STREAM("got /map");
+    ROS_INFO_STREAM("[depth_occupancy_map] got /map");
     const float resolution = msg->info.resolution;
     const int width = MAX_DISTANCE * 2 / resolution;
     m_map.info.width = width;
@@ -62,7 +61,7 @@ void depth_occupancy_map::map_callback(const nav_msgs::OccupancyGrid::ConstPtr& 
 
 void depth_occupancy_map::scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
-    ROS_INFO_STREAM("got /scan");
+    ROS_INFO_STREAM("[depth_occupancy_map] got /scan");
     m_laser_frame = msg->header.frame_id;
     m_ScanSubscriber.shutdown();
 }
@@ -71,7 +70,7 @@ void depth_occupancy_map::timerCallback(const ros::TimerEvent&)
 {
     if (m_do_mapping && !m_depthSubscribed && m_navigating)
     {
-        ROS_INFO_STREAM("waiting for points");
+        ROS_INFO_STREAM("[depth_occupancy_map] waiting for points");
         m_DepthSubscriber = m_nh->subscribe(m_depth_topic, 1, &depth_occupancy_map::depth_callback, this);
         m_depthSubscribed = true;
     }
@@ -79,7 +78,7 @@ void depth_occupancy_map::timerCallback(const ros::TimerEvent&)
 
 void depth_occupancy_map::doMappingCallback(const std_msgs::Bool::ConstPtr& msg)
 {
-    ROS_INFO_STREAM("Depth_Map do mapping is set to " << msg->data);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map do mapping is set to " << msg->data);
     m_do_mapping = msg->data;
 }
 
@@ -100,7 +99,7 @@ void depth_occupancy_map::depth_callback(const sensor_msgs::PointCloud2::ConstPt
 
 void depth_occupancy_map::updateDepthData(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
-    ROS_INFO_STREAM("updateDepthData");
+    ROS_INFO_STREAM("[depth_occupancy_map] updateDepthData");
     geometry_msgs::Point robot;
     geometry_msgs::Point laser;
     robot.x = 0;
@@ -228,17 +227,17 @@ void depth_occupancy_map::updateDepthData(const sensor_msgs::PointCloud2::ConstP
             std_msgs::Float32 min_obstacle_dist_msg;
             min_obstacle_dist_msg.data = min_obstacle_distance;
             m_maxDepthMoveDistancePublisher.publish(min_obstacle_dist_msg);
-            ROS_INFO_STREAM("min_obstacle_distance: " << min_obstacle_distance);
+            ROS_INFO_STREAM("[depth_occupancy_map] min_obstacle_distance: " << min_obstacle_distance);
             publishMap( msg->header.stamp );
         }
         else
         {
-            ROS_INFO_STREAM("Found no transfom");
+            ROS_INFO_STREAM("[depth_occupancy_map] Found no transfom");
         }  //                   publishMap();
     }
     else
     {
-        ROS_INFO_STREAM("stamp error");
+        ROS_INFO_STREAM("[depth_occupancy_map] stamp error");
     }
 }
 
@@ -251,37 +250,37 @@ void depth_occupancy_map::publishMap( ros::Time stamp )
 void depth_occupancy_map::startNavigationCallback(const homer_mapnav_msgs::StartNavigation::ConstPtr& msg)
 {
     m_navigating = true;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 void depth_occupancy_map::moveBaseSimpleGoalCallback(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     m_navigating = true;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 void depth_occupancy_map::stopNavigationCallback(const std_msgs::Empty::ConstPtr& msg)
 {
     m_navigating = false;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 void depth_occupancy_map::navigateToPoiCallback(const homer_mapnav_msgs::NavigateToPOI::ConstPtr& msg)
 {
     m_navigating = true;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 void depth_occupancy_map::targetReachedCallback(const std_msgs::String& msg)
 {
     m_navigating = false;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 void depth_occupancy_map::targetUnreachableCallback(const homer_mapnav_msgs::TargetUnreachable& msg)
 {
     m_navigating = false;
-    ROS_INFO_STREAM("Depth_Map navigating is set to " << m_navigating);
+    ROS_INFO_STREAM("[depth_occupancy_map] Depth_Map navigating is set to " << m_navigating);
 }
 
 int main(int argc, char* argv[])
@@ -292,7 +291,7 @@ int main(int argc, char* argv[])
     depth_occupancy_map node(&nh);
 
     ros::Rate loopRate(10);
-    ROS_INFO_STREAM("depth_occupancy_map node started");
+    ROS_INFO_STREAM("[depth_occupancy_map] depth_occupancy_map node started");
 
     while (ros::ok())
     {
