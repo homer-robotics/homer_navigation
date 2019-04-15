@@ -34,6 +34,7 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
 
     m_do_mapping = true;
     m_navigating = false;
+    m_depthSubscribed = false;
     m_nh->getParam("/rgbd_node/points_topic", m_depth_topic);
     ROS_INFO_STREAM("[depth_occupancy_map] points topic: " << m_depth_topic);
 
