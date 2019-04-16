@@ -37,6 +37,8 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
     m_depthSubscribed = false;
     m_nh->getParam("/rgbd_node/points_topic", m_depth_topic);
     ROS_INFO_STREAM("[depth_occupancy_map] points topic: " << m_depth_topic);
+    m_nh->param("/depth_occupancy_map/distance_offset", m_distance_offset, 0.15);
+    ROS_INFO_STREAM("[depth_occupancy_map] distance offset: " << m_distance_offset);
 
     m_timer.start();
 }
@@ -222,7 +224,7 @@ void depth_occupancy_map::updateDepthData(const sensor_msgs::PointCloud2::ConstP
 
 
             min_obstacle_distance = std::sqrt( min_obstacle_distance );
-            min_obstacle_distance -= 0.20;
+            min_obstacle_distance -= m_distance_offset;
             if( min_obstacle_distance < 0 )
                 min_obstacle_distance = 0.0;
             std_msgs::Float32 min_obstacle_dist_msg;

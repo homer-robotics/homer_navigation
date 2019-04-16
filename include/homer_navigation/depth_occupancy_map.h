@@ -68,6 +68,7 @@ class depth_occupancy_map
 
                 ros::Subscriber m_DepthSubscriber;
                 std::string m_depth_topic;
+                double m_distance_offset;
                 bool m_depthSubscribed;
 
                 ros::Publisher m_depthMapPublisher;
