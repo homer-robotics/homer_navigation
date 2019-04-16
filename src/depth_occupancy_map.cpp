@@ -222,9 +222,9 @@ void depth_occupancy_map::updateDepthData(const sensor_msgs::PointCloud2::ConstP
 
 
             min_obstacle_distance = std::sqrt( min_obstacle_distance );
-            /*min_obstacle_distance -= 0.34;
+            min_obstacle_distance -= 0.20;
             if( min_obstacle_distance < 0 )
-                min_obstacle_distance = 0.0;*/
+                min_obstacle_distance = 0.0;
             std_msgs::Float32 min_obstacle_dist_msg;
             min_obstacle_dist_msg.data = min_obstacle_distance;
             m_maxDepthMoveDistancePublisher.publish(min_obstacle_dist_msg);
