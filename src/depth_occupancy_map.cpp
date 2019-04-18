@@ -32,7 +32,7 @@ depth_occupancy_map::depth_occupancy_map(ros::NodeHandle* nh):
     m_map.info.origin.orientation.y = 0.0;
     m_map.info.origin.orientation.z = 0.0;
 
-    m_do_mapping = true;
+    m_do_mapping = false;
     m_navigating = false;
     m_depthSubscribed = false;
     m_nh->getParam("/rgbd_node/points_topic", m_depth_topic);
