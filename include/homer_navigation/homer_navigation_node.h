@@ -327,7 +327,6 @@ private:
   float m_callback_error_duration;
 
   bool m_seen_obstacle_before;
-  bool m_use_ptu;
 
   bool m_path_reaches_target;
   bool m_initial_path_reaches_target;

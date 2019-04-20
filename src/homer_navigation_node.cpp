@@ -123,7 +123,6 @@ void HomerNavigationNode::loadParameters()
   ros::param::param("/homer_navigation/callback_error_duration",
                     m_callback_error_duration, (float)0.3);
 
-  ros::param::param("/homer_navigation/use_ptu", m_use_ptu, (bool)false);
 
   ros::param::param("/homer_navigation/unknown_threshold", m_unknown_threshold,
                     (int)50);
@@ -709,7 +708,9 @@ bool HomerNavigationNode::checkWaypoints()
 
   sendPathData();
 
-  if (m_use_ptu)
+  bool use_ptu = false;
+  ros::param::getCached("/homer_navigation/use_ptu", use_ptu);
+  if (use_ptu)
   {
     ROS_DEBUG_STREAM("Moving PTU to center next Waypoint");
     homer_ptu_msgs::CenterWorldPoint ptu_msg;
@@ -937,7 +938,9 @@ void HomerNavigationNode::avoidingCollision()
 
 void HomerNavigationNode::finalTurn()
 {
-  if (m_use_ptu)
+  bool use_ptu = false;
+  ros::param::getCached("/homer_navigation/use_ptu", use_ptu);
+  if (use_ptu)
   {
     // reset PTU
     homer_ptu_msgs::SetPanTilt msg;
