@@ -73,6 +73,7 @@ void depth_occupancy_map::timerCallback(const ros::TimerEvent&)
 {
     if (m_do_mapping && !m_depthSubscribed && m_navigating)
     {
+        ros::param::set("/homer_navigation/use_ptu", true);
         ROS_INFO_STREAM("[depth_occupancy_map] waiting for points");
         m_DepthSubscriber = m_nh->subscribe(m_depth_topic, 1, &depth_occupancy_map::depth_callback, this);
         m_depthSubscribed = true;
@@ -95,6 +96,7 @@ void depth_occupancy_map::depth_callback(const sensor_msgs::PointCloud2::ConstPt
         publishMap( msg->header.stamp );
         m_DepthSubscriber.shutdown();
         m_depthSubscribed = false;
+        ros::param::set("/homer_navigation/use_ptu", false);
         return;
     }
     updateDepthData(msg);
