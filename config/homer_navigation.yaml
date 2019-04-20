@@ -36,6 +36,6 @@
 
 /homer_navigation/callback_error_duration:        0.3  # s max duration between pose and laser callbacks before error handling is executed
 
-/homer_navigation/use_ptu:                        true # bool toggles if the ptu is being used to look at the next Waypoint during navigation
+/homer_navigation/use_ptu:                        false # bool toggles if the ptu is being used to look at the next Waypoint during navigation
 /homer_navigation/unknown_threshold:              70   # obstacle strenght under which the obstacle is ignored by navigation
 /homer_navigation/waypoint_radius_factor:         0.5 # factor for includance of obstacle map
