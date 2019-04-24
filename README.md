@@ -2,35 +2,9 @@
 
 ## Introduction 
 
-Das Package "homer_navigation" mit seiner gleichnamigen Node ist für die Navigation des Roboters zuständig. Es hält stets die aktuelle Karte des Roboters vor, die auf Topic /map empfangen wurde und berechnet anhand von dieser Karte einen Pfad vom Roboter zu einem gegebenen Zielpunkt. Dafür verwendet die Navigation die sogenannte Pfad-Transformation - eine Kombination aus Distanz-Transformation und Hindernistransformation -, in Verbindung mit A-Stern, um einen optimalen Pfad zu finden. Das Verhältnis zwischen Distanz- und Hindernis-Transformation kann über einen Parameter angepasst werden.
-Nach der Pfadberechnung ist das Package außerdem dafür zuständig den Roboter diesen Pfad zum Ziel abfahren zu lassen.
+This is the navigation package. Requirements are a robotic pose (`/pose`), a map (`/map`) and laser range measurements (`/scan`).
 
-## Topics 
-
-#### Publisher 
-* `/homer_navigation/target_reached (std_msgs/String)`: Wenn der Roboter sein Ziel erreicht hat, wird eine Message über dieses Topic veschickt.
-* `/homer_navigation/target_unreachable (mapnav_msgs/TargetUnreachable)`: Über dieses Topic wird mitgeteilt, wenn der Roboter sein Ziel nicht erreichen kann und die Navigation abgebrochen wurde. Ein Statuscode wird mitgeliefert (siehe Package map_messages).
-* `/homer_navigation/path (nav_msgs/Path)`: Hierüber wird der aktuelle Pfad zur Visualisierung an die GUI geschickt.
-* `/robot_platform/cmd_vel (geometry_msgs/Twist)`: Über dieses Topic werden die aktuellen Fahrbefehle zum Roboter geschickt. 
-* `/ptu/set_pan_tilt (ptu/SetPanTilt)`: Über dieses Topic wird die PTU nach navigation auf  0, 0 gefahren.
-* `/ptu/center_world_point (ptu/CenterWorldPoint)`: Über dieses Topic wird die PTU auf den nächsten Wegpunkt centriert.
-
-#### Subscriber
-* `/map (nav_msgs/OccupancyGrid)`: Die jeweils aktuelle Map wird empfangen, um sie für die Pfadplanung und Hindernisvermeidung während der Navigation zu verwenden.
-* `/pose (geometry_msgs/PoseStamped)`: Die aktuelle Pose des Roboters wird als Startpunkt der Pfadplanung verwendet.
-* `/scan (sensor_msgs/LaserScan)`: Der aktuelle LaserScan wird zur Hindernisvermeidung verwendet.
-* `/front_scan (sensor_msgs/LaserScan)`: Der aktuelle LaserScan wird zur Hindernisvermeidung verwendet.
-* `/homer_navigation/start_navigation (mapnav_msgs/StartNavigation)`: Startet die Pfadplanung und anschließend die Navigation zur mitgelieferten Zielpose.
-* `/move_base_simple/goal (geometry_msgs/PoseStamped)`: Started die Pfadplanung und anschließende Navigation zur Zielpose.
-* `/homer_navigation/stop_navigation (std_msgs/Empty)`: Stoppt die aktuelle Navigation.
-* `/homer_navigation/navigate_to_POI (mapnav_msgs/NavigateToPOI)`: Startet die Pfadplanung und anschließend die Navigation zum POI mit angegebenen Namen. Der entsprechende POI wird anschließend vom map_manager erfragt.
-* `/homer_navigation/unknown_threshold (std_msgs/Int8)`: Über dieses Topic kann der Schwellwert verändert werden, ab dem ein Zellwahrscheinlichkeit als belegt und damit unbefahrbar markiert wird. Standard ist 50 (%).
-* `/homer_navigation/refresh_params (std_msgs/Empty)`: Über dieses Topic lassen sich die Parameter neu auslesen.
-* `/homer_navigation/max_depth_move_distance (std_msgs/Float32)`: Über dieses Topic lässt sich die Hindernissdistance der Tiefendaten übermitteln. 
-
-## Launch Files 
-
-* `homer_navigation.launch:` Startet die Navigation und lädt alle Navigations-Paramter in den Parameterserver.
+`roslaunch homer_navigation homer_navigation.launch`
 
 ## Parameter 
 
